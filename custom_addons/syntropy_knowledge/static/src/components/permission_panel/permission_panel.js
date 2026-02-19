@@ -2,6 +2,7 @@
 
 import { Component, useState, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 
 export class PermissionPanel extends Component {
@@ -13,7 +14,6 @@ export class PermissionPanel extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.rpc = useService("rpc");
         this.dialogService = useService("dialog");
         this.notificationService = useService("notification");
 
@@ -29,7 +29,7 @@ export class PermissionPanel extends Component {
     async loadData() {
         this.state.loading = true;
         try {
-            this.state.data = await this.rpc("/knowledge/get_article_permission_panel_data", {
+            this.state.data = await rpc("/knowledge/get_article_permission_panel_data", {
                 article_id: this.props.articleId,
             });
         } catch (e) {
@@ -65,7 +65,7 @@ export class PermissionPanel extends Component {
     // ------------------------------------------------------------------
 
     async setInternalPermission(permission) {
-        await this.rpc("/knowledge/article/set_internal_permission", {
+        await rpc("/knowledge/article/set_internal_permission", {
             article_id: this.props.articleId,
             permission,
         });
@@ -73,7 +73,7 @@ export class PermissionPanel extends Component {
     }
 
     async setMemberPermission(memberId, permission) {
-        await this.rpc("/knowledge/article/set_member_permission", {
+        await rpc("/knowledge/article/set_member_permission", {
             article_id: this.props.articleId,
             member_id: memberId,
             permission,
@@ -82,7 +82,7 @@ export class PermissionPanel extends Component {
     }
 
     async removeMember(memberId) {
-        await this.rpc("/knowledge/article/remove_member", {
+        await rpc("/knowledge/article/remove_member", {
             article_id: this.props.articleId,
             member_id: memberId,
         });

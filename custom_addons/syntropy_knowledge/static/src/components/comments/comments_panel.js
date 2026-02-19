@@ -2,6 +2,7 @@
 
 import { Component, useState, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
@@ -12,7 +13,6 @@ export class KnowledgeCommentsPanel extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.rpc = useService("rpc");
 
         this.state = useState({
             threads: [],
@@ -50,7 +50,7 @@ export class KnowledgeCommentsPanel extends Component {
             // Load messages for each thread
             if (threads.length > 0) {
                 const threadIds = threads.map(t => t.id);
-                const messagesData = await this.rpc("/knowledge/threads/messages", {
+                const messagesData = await rpc("/knowledge/threads/messages", {
                     thread_ids: threadIds,
                     limit: 10,
                 });
@@ -72,7 +72,7 @@ export class KnowledgeCommentsPanel extends Component {
 
     async createThread() {
         if (!this.state.newCommentText.trim()) return;
-        await this.rpc("/knowledge/thread/create", {
+        await rpc("/knowledge/thread/create", {
             article_id: this.articleId,
             anchor_text: this.state.newCommentText,
         });
@@ -81,7 +81,7 @@ export class KnowledgeCommentsPanel extends Component {
     }
 
     async toggleResolve(threadId) {
-        await this.rpc("/knowledge/thread/resolve", { thread_id: threadId });
+        await rpc("/knowledge/thread/resolve", { thread_id: threadId });
         await this.loadThreads();
     }
 }
