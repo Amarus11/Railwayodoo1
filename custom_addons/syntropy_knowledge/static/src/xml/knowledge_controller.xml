@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+
+    <!-- Main layout: sidebar + form content -->
+    <t t-name="syntropy_knowledge.KnowledgeArticleFormView">
+        <div class="o_knowledge_form_view d-flex h-100">
+            <!-- Sidebar -->
+            <KnowledgeSidebar record="model.root"/>
+            <!-- Main content area -->
+            <div class="o_knowledge_main flex-grow-1 overflow-auto">
+                <t t-component="props.Renderer"
+                   record="model.root"
+                   Compiler="props.Compiler"
+                   archInfo="archInfo"
+                   onNotebookPageChange.bind="onNotebookPageChange"
+                   activeNotebookPages="props.state and props.state.activeNotebookPages"/>
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="project_timesheet_time_control.TimesheetDashboard">
+        <div class="o_timesheet_dashboard o_action">
+            <div class="container-fluid py-3">
+                <!-- Header -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col">
+                        <h2 class="mb-0">
+                            <i class="fa fa-clock-o me-2 text-primary"/>Timesheet Dashboard
+                        </h2>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-outline-secondary"
+                                t-on-click="onRefresh"
+                                title="Refresh data">
+                            <i class="fa fa-refresh"/>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading -->
+                <t t-if="state.loading">
+                    <div class="text-center py-5">
+                        <i class="fa fa-spinner fa-spin fa-3x text-muted"/>
+                        <p class="mt-3 text-muted">Loading dashboard data...</p>
+                    </div>
+                </t>
+
+                <t t-else="">
+                    <!-- Summary Cards -->
+                    <div class="row mb-4 g-3">
+                        <div class="col-xl col-md-4 col-sm-6">
+                            <div class="card shadow-sm border-0 h-100 o_dashboard_card"
+                                 t-on-click="() => this.openAnalysis('today')">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fa fa-sun-o me-1"/>Today
+                                    </div>
+                                    <h3 class="mb-0 text-primary" t-esc="formatHours(state.todayTotal)"/>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 text-center py-1">
+                                    <span class="small text-muted">
+                                        View details <i class="fa fa-arrow-right ms-1"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl col-md-4 col-sm-6">
+                            <div class="card shadow-sm border-0 h-100 o_dashboard_card"
+                                 t-on-click="() => this.openAnalysis('week')">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fa fa-calendar-o me-1"/>This Week
+                                    </div>
+                                    <h3 class="mb-0 text-success" t-esc="formatHours(state.weekTotal)"/>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 text-center py-1">
+                                    <span class="small text-muted">
+                                        View details <i class="fa fa-arrow-right ms-1"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl col-md-4 col-sm-6">
+                            <div class="card shadow-sm border-0 h-100 o_dashboard_card"
+                                 t-on-click="() => this.openAnalysis('month')">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fa fa-calendar me-1"/>This Month
+                                    </div>
+                                    <h3 class="mb-0 text-info" t-esc="formatHours(state.monthTotal)"/>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 text-center py-1">
+                                    <span class="small text-muted">
+                                        View details <i class="fa fa-arrow-right ms-1"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl col-md-6 col-sm-6">
+                            <div class="card shadow-sm border-0 h-100 o_dashboard_card"
+                                 t-on-click="() => this.openAnalysis('quarter')">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fa fa-bar-chart me-1"/>This Quarter
+                                    </div>
+                                    <h3 class="mb-0 text-warning" t-esc="formatHours(state.quarterTotal)"/>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 text-center py-1">
+                                    <span class="small text-muted">
+                                        View details <i class="fa fa-arrow-right ms-1"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl col-md-6 col-sm-6">
+                            <div class="card shadow-sm border-0 h-100 o_dashboard_card"
+                                 t-on-click="() => this.openAnalysis('year')">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fa fa-calendar-check-o me-1"/>This Year
+                                    </div>
+                                    <h3 class="mb-0 text-danger" t-esc="formatHours(state.yearTotal)"/>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 text-center py-1">
+                                    <span class="small text-muted">
+                                        View details <i class="fa fa-arrow-right ms-1"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Daily Chart -->
+                        <div class="col-lg-5">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white border-0">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-bar-chart me-2 text-primary"/>Weekly Activity
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <t t-if="state.dailyBreakdown.length">
+                                        <div class="d-flex align-items-end justify-content-around"
+                                             style="height: 220px; padding-top: 10px;">
+                                            <t t-foreach="state.dailyBreakdown" t-as="day" t-key="day.date">
+                                                <div class="d-flex flex-column align-items-center justify-content-end"
+                                                     style="flex: 1; max-width: 80px; height: 100%;">
+                                                    <small class="fw-semibold mb-1"
+                                                           style="font-size: 12px;"
+                                                           t-esc="formatHours(day.hours)"/>
+                                                    <div class="bg-primary rounded-top w-75 position-relative"
+                                                         t-attf-style="height: {{ getDailyBarHeight(day.hours) }}px; min-height: 4px; transition: height 0.3s ease;">
+                                                    </div>
+                                                    <small class="text-muted mt-1 text-truncate fw-medium"
+                                                           style="max-width: 70px; font-size: 11px;"
+                                                           t-esc="day.date"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="text-center text-muted py-5">
+                                            <i class="fa fa-bar-chart fa-2x mb-2 d-block"/>
+                                            No data for this week
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Breakdown Table -->
+                        <div class="col-lg-7">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-list-alt me-2 text-primary"/>Project Breakdown
+                                        <small class="text-muted">(This Month)</small>
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0" style="max-height: 450px; overflow-y: auto;">
+                                    <t t-if="state.projectBreakdown.length">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                                <tr>
+                                                    <th>Project</th>
+                                                    <th>Task</th>
+                                                    <th class="text-end" style="width: 100px;">Hours</th>
+                                                    <th style="width: 25%;">Distribution</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="getGroupedBreakdown()" t-as="group" t-key="group.project_name">
+                                                    <!-- Group header row -->
+                                                    <tr class="table-light cursor-pointer"
+                                                        t-on-click="() => this.toggleProjectGroup(group.project_name)"
+                                                        style="cursor: pointer;">
+                                                        <td colspan="2" class="fw-bold">
+                                                            <i t-att-class="'fa me-1 ' + (state.collapsedProjects[group.project_name] ? 'fa-caret-right' : 'fa-caret-down')"/>
+                                                            <i class="fa fa-folder-o me-1 text-muted"/>
+                                                            <t t-esc="group.project_name || 'No Project'"/>
+                                                            <span class="badge bg-secondary ms-2" t-esc="group.rows.length"/>
+                                                        </td>
+                                                        <td class="text-end fw-bold" t-esc="formatHours(group.total_hours)"/>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="progress flex-grow-1" style="height: 18px;">
+                                                                    <div class="progress-bar bg-primary"
+                                                                         role="progressbar"
+                                                                         t-attf-style="width: {{ group.total_percentage }}%">
+                                                                    </div>
+                                                                </div>
+                                                                <small class="text-muted ms-2"
+                                                                       style="min-width: 35px;"
+                                                                       t-esc="group.total_percentage + '%'"/>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <!-- Task rows (collapsed by default) -->
+                                                    <t t-if="!state.collapsedProjects[group.project_name]">
+                                                        <t t-foreach="group.rows" t-as="row" t-key="row.id">
+                                                            <tr>
+                                                                <td class="ps-4 text-muted" style="font-size: 0.9em;">
+                                                                </td>
+                                                                <td class="text-muted" style="font-size: 0.9em;" t-esc="row.task_name or '-'"/>
+                                                                <td class="text-end" style="font-size: 0.9em;" t-esc="formatHours(row.hours)"/>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="progress flex-grow-1" style="height: 12px;">
+                                                                            <div class="progress-bar bg-primary opacity-50"
+                                                                                 role="progressbar"
+                                                                                 t-attf-style="width: {{ row.percentage }}%">
+                                                                            </div>
+                                                                        </div>
+                                                                        <small class="text-muted ms-2"
+                                                                               style="min-width: 35px; font-size: 0.85em;"
+                                                                               t-esc="row.percentage + '%'"/>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                    </t>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="text-center text-muted py-5">
+                                            <i class="fa fa-folder-open-o fa-2x mb-2 d-block"/>
+                                            No project data for this month
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>
