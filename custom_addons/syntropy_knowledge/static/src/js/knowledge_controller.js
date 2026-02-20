@@ -37,7 +37,7 @@ export class KnowledgeArticleFormController extends FormController {
         const newId = await this.orm.call(
             "knowledge.article",
             "action_create_article",
-            [],
+            [[]],
             {
                 name: _t("Untitled"),
                 icon: getRandomEmoji(),
@@ -54,16 +54,10 @@ export class KnowledgeArticleFormController extends FormController {
      * @param {number} articleId
      */
     async openArticle(articleId) {
-        await this.actionService.doAction({
-            type: "ir.actions.act_window",
-            res_model: "knowledge.article",
-            res_id: articleId,
-            views: [[false, "form"]],
-            view_mode: "form",
-        }, {
-            clearBreadcrumbs: true,
-            additionalContext: { form_view_ref: "syntropy_knowledge.knowledge_article_view_form" },
-        });
+        // Navigate via URL to avoid the action service's getLocalState crash.
+        // The action service calls querySelector on all active controller DOMs
+        // before performing doAction, which crashes when the form isn't mounted.
+        window.location.assign(`/odoo/knowledge.article/${articleId}`);
     }
 
     /**

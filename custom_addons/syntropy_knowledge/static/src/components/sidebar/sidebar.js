@@ -134,19 +134,10 @@ export class KnowledgeSidebar extends Component {
     // ------------------------------------------------------------------
 
     openArticle(articleId) {
-        if (this.env.createArticle) {
-            // We're inside a knowledge form view
+        if (this.env.openArticle) {
             this.env.openArticle(articleId);
         } else {
-            this.actionService.doAction({
-                type: "ir.actions.act_window",
-                res_model: "knowledge.article",
-                res_id: articleId,
-                views: [[false, "form"]],
-                view_mode: "form",
-            }, {
-                clearBreadcrumbs: true,
-            });
+            window.location.assign(`/odoo/knowledge.article/${articleId}`);
         }
     }
 

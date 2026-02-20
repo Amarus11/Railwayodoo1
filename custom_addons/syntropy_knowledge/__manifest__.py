@@ -43,6 +43,7 @@
             "syntropy_knowledge/static/src/scss/knowledge_views.scss",
             "syntropy_knowledge/static/src/scss/knowledge_editor.scss",
             # JS - Core
+            "syntropy_knowledge/static/src/js/form_controller_patch.js",
             "syntropy_knowledge/static/src/js/knowledge_utils.js",
             "syntropy_knowledge/static/src/js/knowledge_views.js",
             "syntropy_knowledge/static/src/js/knowledge_controller.js",
