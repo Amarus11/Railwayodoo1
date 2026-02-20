@@ -4,6 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { FormController } from "@web/views/form/form_controller";
 import { useService } from "@web/core/utils/hooks";
 import { useChildSubEnv } from "@odoo/owl";
+import { session } from "@web/session";
 import { getRandomEmoji } from "./knowledge_utils";
 import { KnowledgeSidebar } from "../components/sidebar/sidebar";
 
@@ -18,7 +19,6 @@ export class KnowledgeArticleFormController extends FormController {
         super.setup();
         this.orm = useService("orm");
         this.actionService = useService("action");
-        this.userService = useService("user");
 
         useChildSubEnv({
             createArticle: this.createArticle.bind(this),
@@ -47,7 +47,7 @@ export class KnowledgeArticleFormController extends FormController {
             if (category === "private") {
                 values.internal_permission = "none";
                 values.article_member_ids = [[0, 0, {
-                    partner_id: this.userService.partnerId,
+                    partner_id: session.partner_id,
                     permission: "write",
                 }]];
             } else if (category === "workspace") {
