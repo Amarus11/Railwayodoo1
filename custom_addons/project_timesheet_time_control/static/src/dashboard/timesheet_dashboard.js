@@ -167,6 +167,10 @@ export class TimesheetDashboard extends Component {
     async onRefresh() {
         await this.loadData();
     }
+
+    onTimerStopped() {
+        this.loadData();
+    }
 }
 
 registry.category("actions").add("timesheet_time_control_dashboard", TimesheetDashboard);

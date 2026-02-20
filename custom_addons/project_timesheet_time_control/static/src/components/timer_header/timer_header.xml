@@ -11,8 +11,7 @@
                            t-att-value="state.description"
                            t-on-input="onDescriptionInput"
                            t-on-keydown="onDescriptionKeydown"
-                           placeholder="What are you working on?"
-                           t-att-disabled="state.isRunning"/>
+                           placeholder="What are you working on?"/>
                 </div>
 
                 <!-- Project selector -->
@@ -26,11 +25,6 @@
                               t-esc="state.projectName || 'Project'"/>
                         <i class="fa fa-caret-down ms-1"/>
                     </button>
-                    <t t-if="state.projectId and !state.isRunning">
-                        <button class="o_timer_clear_btn" t-on-click="clearProject" title="Clear project">
-                            <i class="fa fa-times"/>
-                        </button>
-                    </t>
                     <!-- Project dropdown -->
                     <div t-if="state.showProjectDropdown" class="o_timer_dropdown">
                         <div class="o_timer_dropdown_search">
@@ -66,11 +60,6 @@
                               t-esc="state.taskName || 'Task'"/>
                         <i class="fa fa-caret-down ms-1"/>
                     </button>
-                    <t t-if="state.taskId and !state.isRunning">
-                        <button class="o_timer_clear_btn" t-on-click="clearTask" title="Clear task">
-                            <i class="fa fa-times"/>
-                        </button>
-                    </t>
                     <!-- Task dropdown -->
                     <div t-if="state.showTaskDropdown" class="o_timer_dropdown">
                         <div class="o_timer_dropdown_search">

@@ -41,12 +41,6 @@
                 box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
             }
 
-            &:disabled {
-                background: #e9ecef;
-                color: #495057;
-                cursor: not-allowed;
-            }
-
             &::placeholder {
                 color: #adb5bd;
                 font-style: italic;
@@ -86,30 +80,6 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 max-width: 120px;
-            }
-        }
-
-        .o_timer_clear_btn {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border: none;
-            background: #dc3545;
-            color: #fff;
-            font-size: 9px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            line-height: 1;
-            z-index: 2;
-
-            &:hover {
-                background: #c82333;
             }
         }
     }
