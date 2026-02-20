@@ -1143,9 +1143,10 @@ class KnowledgeArticle(models.Model):
         article = self.create(values)
         return article.id
 
+    @api.model
     def action_home_page(self):
         """Return an action redirecting to the first accessible article."""
-        article = self[0] if self else self._get_first_accessible_article()
+        article = self._get_first_accessible_article()
         action = self.env['ir.actions.act_window']._for_xml_id(
             'syntropy_knowledge.knowledge_article_action_form'
         )
@@ -1306,6 +1307,7 @@ class KnowledgeArticle(models.Model):
     # SIDEBAR & SEARCH
     # ==================================================================
 
+    @api.model
     def get_sidebar_articles(self, unfolded_ids=False):
         """Return structured data for the knowledge sidebar tree.
 
@@ -1368,6 +1370,7 @@ class KnowledgeArticle(models.Model):
             'favorite_ids': favorite_articles.ids,
         }
 
+    @api.model
     def get_user_sorted_articles(self, search_term, limit=40):
         """Full-text search on name and body using simple ILIKE.
 
