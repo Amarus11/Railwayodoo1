@@ -4,7 +4,6 @@ import { _t } from "@web/core/l10n/translation";
 import { FormController } from "@web/views/form/form_controller";
 import { useService } from "@web/core/utils/hooks";
 import { useChildSubEnv } from "@odoo/owl";
-import { session } from "@web/session";
 import { getRandomEmoji } from "./knowledge_utils";
 import { KnowledgeSidebar } from "../components/sidebar/sidebar";
 
@@ -35,28 +34,18 @@ export class KnowledgeArticleFormController extends FormController {
      * @param {boolean} params.isItem - Whether this is an article item
      */
     async createArticle({ parentId = false, category = "private", isItem = false } = {}) {
-        const values = {
-            name: _t("Untitled"),
-            icon: getRandomEmoji(),
-            parent_id: parentId || false,
-            is_article_item: isItem,
-        };
-
-        // Set permissions based on category
-        if (!parentId) {
-            if (category === "private") {
-                values.internal_permission = "none";
-                values.article_member_ids = [[0, 0, {
-                    partner_id: session.partner_id,
-                    permission: "write",
-                }]];
-            } else if (category === "workspace") {
-                values.internal_permission = "write";
-            }
-        }
-
-        const articleId = await this.orm.call("knowledge.article", "create", [[values]]);
-        const newId = Array.isArray(articleId) ? articleId[0] : articleId;
+        const newId = await this.orm.call(
+            "knowledge.article",
+            "action_create_article",
+            [],
+            {
+                name: _t("Untitled"),
+                icon: getRandomEmoji(),
+                parent_id: parentId || false,
+                category,
+                is_item: isItem,
+            },
+        );
         await this.openArticle(newId);
     }
 

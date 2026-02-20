@@ -1112,6 +1112,41 @@ class KnowledgeArticle(models.Model):
         }
         return self.create(vals)
 
+    @api.model
+    def action_create_article(self, name="", icon="", parent_id=False, category="private", is_item=False):
+        """Create a new article with proper permissions.
+
+        Server-side method to handle article creation including
+        private article member setup using the current user's partner.
+
+        :param str name: article title
+        :param str icon: emoji icon
+        :param int parent_id: parent article ID (False for root)
+        :param str category: 'workspace', 'private', or 'shared'
+        :param bool is_item: whether this is an article item
+        :returns: ID of the newly created article
+        :rtype: int
+        """
+        values = {
+            'name': name or _("Untitled"),
+            'icon': icon or False,
+            'parent_id': parent_id or False,
+            'is_article_item': is_item,
+        }
+
+        if not parent_id:
+            if category == 'private':
+                values['internal_permission'] = 'none'
+                values['article_member_ids'] = [(0, 0, {
+                    'partner_id': self.env.user.partner_id.id,
+                    'permission': 'write',
+                })]
+            elif category == 'workspace':
+                values['internal_permission'] = 'write'
+
+        article = self.create(values)
+        return article.id
+
     def action_home_page(self):
         """Return an action redirecting to the first accessible article."""
         article = self[0] if self else self._get_first_accessible_article()
