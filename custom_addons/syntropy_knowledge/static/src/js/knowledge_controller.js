@@ -65,10 +65,19 @@ export class KnowledgeArticleFormController extends FormController {
     }
 
     /**
-     * getLocalState is already patched globally via form_controller_patch.js.
-     * The subclass override is removed to avoid redundancy — the prototype-level
-     * try/catch handles all FormController instances including this one.
+     * Safe getLocalState — guard against querySelector on null el.
+     * The action service calls this on all active controllers when navigating.
+     * If the form DOM has been destroyed or is not yet mounted, this.el is null
+     * and the parent's querySelector call crashes the entire doAction chain.
      */
+    getLocalState() {
+        if (!this.el) return {};
+        try {
+            return super.getLocalState(...arguments);
+        } catch {
+            return {};
+        }
+    }
 
     /**
      * Override to auto-save on navigating away.

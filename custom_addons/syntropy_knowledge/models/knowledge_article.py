@@ -1365,8 +1365,22 @@ class KnowledgeArticle(models.Model):
             'is_user_favorite', 'category', 'sequence', 'user_favorite_sequence',
         ]
 
+        articles_data = all_articles.read(fields_to_read, load=None)
+        # Build {id: data} dict expected by the JS sidebar
+        articles_map = {}
+        for art in articles_data:
+            art_id = art['id']
+            # Normalize parent_id from (id, name) tuple to plain id
+            pid = art.get('parent_id')
+            if isinstance(pid, (list, tuple)):
+                art['parent_id'] = pid[0]
+            articles_map[art_id] = art
+
         return {
-            'articles': all_articles.read(fields_to_read, load=None),
+            'articles': articles_map,
+            'workspace_ids': workspace_roots.ids,
+            'shared_ids': shared_roots.ids,
+            'private_ids': private_roots.ids,
             'favorite_ids': favorite_articles.ids,
         }
 
