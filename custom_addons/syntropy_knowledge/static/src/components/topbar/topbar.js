@@ -7,6 +7,7 @@ import { _t } from "@web/core/l10n/translation";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { KnowledgeCommentsPanel } from "../comments/comments_panel";
 import { PermissionPanel } from "../permission_panel/permission_panel";
+import { MoveArticleDialog } from "../move_article_dialog/move_article_dialog";
 
 export class KnowledgeTopbar extends Component {
     static template = "syntropy_knowledge.Topbar";
@@ -163,13 +164,10 @@ export class KnowledgeTopbar extends Component {
 
     onMoveArticle() {
         this.state.showMoreMenu = false;
-        // Open move dialog via the dialog service
-        import("../move_article_dialog/move_article_dialog").then(({ MoveArticleDialog }) => {
-            this.dialogService.add(MoveArticleDialog, {
-                articleId: this.articleId,
-                articleName: this.articleName,
-                onMoved: () => this.record.load(),
-            });
+        this.dialogService.add(MoveArticleDialog, {
+            articleId: this.articleId,
+            articleName: this.articleName,
+            onMoved: () => this.record.load(),
         });
     }
 
@@ -197,16 +195,22 @@ export class KnowledgeTopbar extends Component {
         );
     }
 
-    onViewVersionHistory() {
-        this.actionService.doAction({
-            type: "ir.actions.act_window",
-            name: _t("Version History"),
-            res_model: "knowledge.article.version",
-            views: [[false, "list"], [false, "form"]],
-            domain: [["article_id", "=", this.articleId]],
-            context: { default_article_id: this.articleId },
-        });
+    async onViewVersionHistory() {
         this.state.showMoreMenu = false;
+        try {
+            await this.actionService.doAction({
+                type: "ir.actions.act_window",
+                name: _t("Version History"),
+                res_model: "knowledge.article.version",
+                views: [[false, "list"], [false, "form"]],
+                domain: [["article_id", "=", this.articleId]],
+                context: { default_article_id: this.articleId },
+            });
+        } catch (e) {
+            console.warn("Version history navigation error (handled):", e);
+            // Fallback: navigate via URL
+            window.location.assign(`/odoo/knowledge.article.version?article_id=${this.articleId}`);
+        }
     }
 }
 

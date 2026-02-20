@@ -1,25 +1,26 @@
 /** @odoo-module **/
 
 import { FormController } from "@web/views/form/form_controller";
-import { patch } from "@web/core/utils/patch";
 
 /**
- * Patch FormController.getLocalState to prevent querySelector crash.
+ * Direct prototype override for FormController.getLocalState.
  *
  * The action service calls getLocalState() on all active controllers when
- * navigating. If the form DOM is not yet mounted (e.g., first load with no
- * record, or during rapid navigation), querySelector is called on a null
- * element, crashing the entire navigation.
+ * navigating (via _updateUI → doAction). If the form DOM is not yet mounted
+ * (e.g., first load with no record, component destroyed, or during rapid
+ * navigation), querySelector is called on a null element reference, crashing
+ * the entire navigation chain.
  *
- * This patch wraps the original in a try/catch so the error is silently
- * handled and navigation continues.
+ * We bypass Odoo's patch() utility and directly override the prototype method
+ * to guarantee the try/catch is in place regardless of super-chain wiring.
  */
-patch(FormController.prototype, {
-    getLocalState() {
-        try {
-            return super.getLocalState(...arguments);
-        } catch {
-            return {};
-        }
-    },
-});
+const _originalGetLocalState = FormController.prototype.getLocalState;
+
+FormController.prototype.getLocalState = function () {
+    try {
+        return _originalGetLocalState.apply(this, arguments);
+    } catch (e) {
+        console.warn("FormController.getLocalState error (suppressed):", e?.message);
+        return {};
+    }
+};

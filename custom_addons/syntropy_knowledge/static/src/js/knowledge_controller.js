@@ -65,16 +65,10 @@ export class KnowledgeArticleFormController extends FormController {
     }
 
     /**
-     * Override getLocalState to prevent querySelector crash when DOM is not available.
-     * This happens when navigating away before the component is fully rendered.
+     * getLocalState is already patched globally via form_controller_patch.js.
+     * The subclass override is removed to avoid redundancy — the prototype-level
+     * try/catch handles all FormController instances including this one.
      */
-    getLocalState() {
-        try {
-            return super.getLocalState(...arguments);
-        } catch {
-            return {};
-        }
-    }
 
     /**
      * Override to auto-save on navigating away.
