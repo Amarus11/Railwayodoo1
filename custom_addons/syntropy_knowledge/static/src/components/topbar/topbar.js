@@ -202,7 +202,7 @@ export class KnowledgeTopbar extends Component {
             type: "ir.actions.act_window",
             name: _t("Version History"),
             res_model: "knowledge.article.version",
-            view_mode: "list,form",
+            views: [[false, "list"], [false, "form"]],
             domain: [["article_id", "=", this.articleId]],
             context: { default_article_id: this.articleId },
         });
