@@ -37,7 +37,7 @@ export class KnowledgeArticleFormController extends FormController {
         const newId = await this.orm.call(
             "knowledge.article",
             "action_create_article",
-            [[], _t("Untitled"), getRandomEmoji(), parentId || false, category, isItem],
+            [_t("Untitled"), getRandomEmoji(), parentId || false, category, isItem],
         );
         await this.openArticle(newId);
     }
