@@ -44,11 +44,9 @@ class KnowledgeArticleFavorite(models.Model):
     # CRUD
     # ------------------------------------------------------------------
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Auto-assign sequence as max + 1 for each user."""
-        if isinstance(vals_list, dict):
-            vals_list = [vals_list]
         for vals in vals_list:
             if 'sequence' not in vals:
                 user_id = vals.get('user_id', self.env.uid)

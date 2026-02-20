@@ -43,11 +43,9 @@ class KnowledgeCover(models.Model):
             else:
                 cover.attachment_url = False
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Link uploaded attachments as public covers."""
-        if isinstance(vals_list, dict):
-            vals_list = [vals_list]
         records = super().create(vals_list)
         for cover in records:
             if cover.attachment_id:

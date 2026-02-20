@@ -829,7 +829,7 @@ class KnowledgeArticle(models.Model):
     # CRUD
     # ==================================================================
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Create one or more articles.
 
@@ -837,11 +837,7 @@ class KnowledgeArticle(models.Model):
         * Set the body header from the name when no body is provided.
         * Track last_edition_uid / last_edition_date.
         * Auto-sequence based on parent's current max sequence.
-
-        Odoo 18: create() natively accepts a list — no @api.model_create_multi.
         """
-        if isinstance(vals_list, dict):
-            vals_list = [vals_list]
 
         vals_by_parent = {}
         parent_ids = set()

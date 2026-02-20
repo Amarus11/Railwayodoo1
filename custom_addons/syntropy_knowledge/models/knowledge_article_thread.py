@@ -37,11 +37,9 @@ class KnowledgeArticleThread(models.Model):
     # CRUD
     # ------------------------------------------------------------------
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Truncate anchor text to avoid bloating the DB."""
-        if isinstance(vals_list, dict):
-            vals_list = [vals_list]
         for vals in vals_list:
             if vals.get('article_anchor_text'):
                 vals['article_anchor_text'] = vals['article_anchor_text'][:1200]
