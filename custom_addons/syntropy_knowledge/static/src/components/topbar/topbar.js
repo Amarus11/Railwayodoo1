@@ -5,9 +5,12 @@ import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { KnowledgeCommentsPanel } from "../comments/comments_panel";
+import { PermissionPanel } from "../permission_panel/permission_panel";
 
 export class KnowledgeTopbar extends Component {
     static template = "syntropy_knowledge.Topbar";
+    static components = { KnowledgeCommentsPanel, PermissionPanel };
     static props = { ...standardWidgetProps };
 
     setup() {
@@ -19,6 +22,7 @@ export class KnowledgeTopbar extends Component {
         this.state = useState({
             showSharePanel: false,
             showMoreMenu: false,
+            showComments: false,
         });
     }
 
@@ -88,6 +92,10 @@ export class KnowledgeTopbar extends Component {
 
     toggleMoreMenu() {
         this.state.showMoreMenu = !this.state.showMoreMenu;
+    }
+
+    toggleComments() {
+        this.state.showComments = !this.state.showComments;
     }
 
     async onToggleFavorite() {

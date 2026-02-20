@@ -62,6 +62,14 @@
                     </div>
                 </div>
 
+                <!-- Comments toggle -->
+                <button class="btn btn-sm"
+                        t-att-class="state.showComments ? 'btn-info' : 'btn-outline-secondary'"
+                        t-on-click="toggleComments"
+                        title="Comments">
+                    <i class="fa fa-comments-o"/>
+                </button>
+
                 <!-- More options dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary btn-sm"
@@ -122,6 +130,11 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Slide-out Comments Panel -->
+        <div t-if="state.showComments" class="o_knowledge_comments_slideout">
+            <KnowledgeCommentsPanel record="props.record" />
         </div>
     </t>
 

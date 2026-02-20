@@ -9,7 +9,11 @@ import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
 export class KnowledgeCommentsPanel extends Component {
     static template = "syntropy_knowledge.CommentsPanel";
-    static props = { ...standardWidgetProps };
+    static props = {
+        record: { type: Object },
+        // Accept remaining widget props without validation
+        "*": true,
+    };
 
     setup() {
         this.orm = useService("orm");

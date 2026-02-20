@@ -18,6 +18,7 @@ export class KnowledgeArticleFormController extends FormController {
         super.setup();
         this.orm = useService("orm");
         this.actionService = useService("action");
+        this.userService = useService("user");
 
         useChildSubEnv({
             createArticle: this.createArticle.bind(this),
@@ -46,7 +47,7 @@ export class KnowledgeArticleFormController extends FormController {
             if (category === "private") {
                 values.internal_permission = "none";
                 values.article_member_ids = [[0, 0, {
-                    partner_id: this.env.services.user.partnerId,
+                    partner_id: this.userService.partnerId,
                     permission: "write",
                 }]];
             } else if (category === "workspace") {
@@ -85,6 +86,18 @@ export class KnowledgeArticleFormController extends FormController {
         await this.orm.write("knowledge.article", [this.model.root.resId], { name: newName });
         // Trigger a re-render
         await this.model.root.load();
+    }
+
+    /**
+     * Override getLocalState to prevent querySelector crash when DOM is not available.
+     * This happens when navigating away before the component is fully rendered.
+     */
+    getLocalState() {
+        try {
+            return super.getLocalState(...arguments);
+        } catch {
+            return {};
+        }
     }
 
     /**
