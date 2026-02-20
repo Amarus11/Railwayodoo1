@@ -4,9 +4,11 @@ import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formatFloatTime } from "@project_timesheet_time_control/utils/timer_utils";
+import { TimesheetTimerHeader } from "@project_timesheet_time_control/components/timer_header/timer_header";
 
 export class TimesheetDashboard extends Component {
     static template = "project_timesheet_time_control.TimesheetDashboard";
+    static components = { TimesheetTimerHeader };
 
     setup() {
         this.orm = useService("orm");

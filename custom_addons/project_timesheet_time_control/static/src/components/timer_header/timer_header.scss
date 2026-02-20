@@ -1,0 +1,455 @@
+// Timer Header - Toggl-style bar
+.o_timer_header {
+    background: #fff;
+    border-bottom: 2px solid #e9ecef;
+    padding: 8px 16px;
+    position: relative;
+    z-index: 100;
+    transition: border-color 0.3s ease, background 0.3s ease;
+
+    &.o_timer_running {
+        border-bottom-color: #28a745;
+        background: linear-gradient(180deg, #f0fff0 0%, #fff 100%);
+    }
+
+    .o_timer_header_inner {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 100%;
+        flex-wrap: nowrap;
+    }
+
+    // Description input
+    .o_timer_description {
+        flex: 1;
+        min-width: 150px;
+
+        .o_timer_desc_input {
+            width: 100%;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            background: #f8f9fa;
+            transition: all 0.2s ease;
+            outline: none;
+
+            &:focus {
+                border-color: #7c3aed;
+                background: #fff;
+                box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+            }
+
+            &:disabled {
+                background: #e9ecef;
+                color: #495057;
+                cursor: not-allowed;
+            }
+
+            &::placeholder {
+                color: #adb5bd;
+                font-style: italic;
+            }
+        }
+    }
+
+    // Selector buttons (project/task/tags)
+    .o_timer_selector {
+        position: relative;
+
+        .o_timer_selector_btn {
+            display: flex;
+            align-items: center;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 13px;
+            background: #f8f9fa;
+            color: #495057;
+            cursor: pointer;
+            white-space: nowrap;
+            max-width: 180px;
+            transition: all 0.2s ease;
+
+            &:hover:not(:disabled) {
+                border-color: #7c3aed;
+                background: #fff;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            .o_timer_selector_text {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 120px;
+            }
+        }
+
+        .o_timer_clear_btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: none;
+            background: #dc3545;
+            color: #fff;
+            font-size: 9px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+            z-index: 2;
+
+            &:hover {
+                background: #c82333;
+            }
+        }
+    }
+
+    // Dropdown menus
+    .o_timer_dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 250px;
+        max-width: 350px;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        z-index: 1050;
+        margin-top: 4px;
+        overflow: hidden;
+
+        .o_timer_dropdown_header {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+            font-size: 13px;
+        }
+
+        .o_timer_dropdown_search {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+
+            .o_timer_dropdown_input {
+                width: 100%;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 6px 10px;
+                font-size: 13px;
+                outline: none;
+
+                &:focus {
+                    border-color: #7c3aed;
+                    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+                }
+            }
+        }
+
+        .o_timer_dropdown_list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .o_timer_dropdown_item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.15s ease;
+
+            &:hover {
+                background: #f0f0ff;
+            }
+
+            &.active {
+                background: #e8e0ff;
+                font-weight: 600;
+            }
+        }
+
+        .o_timer_dropdown_empty {
+            padding: 12px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 13px;
+            font-style: italic;
+        }
+    }
+
+    // Tag specific styles
+    .o_timer_tag_btn {
+        flex-wrap: wrap;
+        gap: 3px;
+        max-width: 250px !important;
+    }
+
+    .o_timer_tag_badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        color: #fff;
+        font-weight: 500;
+        line-height: 1.4;
+
+        .o_timer_tag_remove {
+            cursor: pointer;
+            font-size: 9px;
+            opacity: 0.8;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+
+    .o_timer_tag_item {
+        .o_timer_tag_color_dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+    }
+
+    // Favorites
+    .o_timer_fav_selector {
+        display: flex;
+        gap: 2px;
+    }
+
+    .o_timer_fav_btn,
+    .o_timer_fav_save_btn {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 14px;
+        background: #f8f9fa;
+        color: #f0ad4e;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+
+        &:hover {
+            background: #fff3cd;
+            border-color: #f0ad4e;
+        }
+    }
+
+    .o_timer_fav_save_btn {
+        padding: 8px 8px;
+        font-size: 12px;
+
+        .o_timer_fav_plus {
+            font-size: 8px;
+            position: absolute;
+            bottom: 4px;
+            right: 3px;
+            color: #28a745;
+        }
+    }
+
+    .o_timer_fav_dropdown {
+        min-width: 300px;
+        right: 0;
+        left: auto;
+    }
+
+    .o_timer_fav_item {
+        justify-content: space-between;
+
+        .o_timer_fav_info {
+            flex: 1;
+            min-width: 0;
+
+            .o_timer_fav_name {
+                font-weight: 500;
+                font-size: 13px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .o_timer_fav_meta {
+                font-size: 11px;
+                margin-top: 2px;
+            }
+        }
+
+        .o_timer_fav_delete {
+            border: none;
+            background: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        &:hover .o_timer_fav_delete {
+            opacity: 1;
+        }
+    }
+
+    // Timer controls (elapsed + button)
+    .o_timer_controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    .o_timer_elapsed {
+        font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+        font-size: 22px;
+        font-weight: 600;
+        color: #6c757d;
+        min-width: 100px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        transition: color 0.3s ease;
+
+        &.o_timer_elapsed_running {
+            color: #28a745;
+            animation: o_elapsed_pulse 2s ease-in-out infinite;
+        }
+    }
+
+    @keyframes o_elapsed_pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .o_timer_toggle_btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+        &.o_timer_start_btn {
+            background: #7c3aed;
+            color: #fff;
+
+            &:hover {
+                background: #6d28d9;
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+            }
+        }
+
+        &.o_timer_stop_btn {
+            background: #dc3545;
+            color: #fff;
+
+            &:hover {
+                background: #c82333;
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+            }
+        }
+    }
+
+    // Keyboard shortcut hint
+    .o_timer_shortcut_hint {
+        position: absolute;
+        right: 16px;
+        bottom: -18px;
+        font-size: 10px;
+        color: #adb5bd;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+
+        kbd {
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 0 4px;
+            font-size: 10px;
+            color: #6c757d;
+        }
+    }
+
+    &:hover .o_timer_shortcut_hint {
+        opacity: 1;
+    }
+
+    // Idle detection overlay (Feature 5)
+    .o_timer_idle_overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .o_timer_idle_dialog {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+        .o_timer_idle_header {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .o_timer_idle_body {
+            color: #495057;
+            margin-bottom: 16px;
+            font-size: 14px;
+
+            p { margin-bottom: 8px; }
+        }
+
+        .o_timer_idle_actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+    }
+}
+
+// Responsive
+@media (max-width: 992px) {
+    .o_timer_header {
+        .o_timer_header_inner {
+            flex-wrap: wrap;
+        }
+
+        .o_timer_description {
+            min-width: 100%;
+            order: -1;
+        }
+
+        .o_timer_controls {
+            margin-left: 0;
+        }
+    }
+}

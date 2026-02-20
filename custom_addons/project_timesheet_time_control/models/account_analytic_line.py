@@ -34,6 +34,13 @@ class AccountAnalyticLine(models.Model):
         string="Timer Running",
         compute="_compute_is_timer_running",
     )
+    tag_ids = fields.Many2many(
+        comodel_name="hr.timesheet.tag",
+        string="Tags",
+        relation="account_analytic_line_tag_rel",
+        column1="line_id",
+        column2="tag_id",
+    )
 
     @api.depends("unit_amount", "date_time")
     def _compute_is_timer_running(self):
@@ -206,3 +213,95 @@ class AccountAnalyticLine(models.Model):
                 ),
             )
         ]
+
+    # ---- Timer Header RPC methods ----
+
+    @api.model
+    def get_running_timer(self):
+        """Return info about the current user's running timer, if any."""
+        running = self.search(self._running_domain(), limit=1)
+        if not running:
+            return False
+        return {
+            "id": running.id,
+            "name": running.name or "",
+            "project_id": running.project_id.id if running.project_id else False,
+            "project_name": running.project_id.name if running.project_id else "",
+            "task_id": running.task_id.id if running.task_id else False,
+            "task_name": running.task_id.name if running.task_id else "",
+            "date_time": fields.Datetime.to_string(running.date_time),
+            "tag_ids": running.tag_ids.ids,
+            "tag_names": running.tag_ids.mapped("name"),
+        }
+
+    @api.model
+    def start_timer(self, description, project_id, task_id=False, tag_ids=None):
+        """Start a new timer, stopping any running one first."""
+        # Stop any running timer
+        running = self.search(self._running_domain())
+        if running:
+            running.button_end_work()
+        # Create new timesheet line
+        employee = self.env.user.employee_ids[:1]
+        if not employee:
+            return False
+        vals = {
+            "name": description or "/",
+            "project_id": project_id,
+            "task_id": task_id or False,
+            "employee_id": employee.id,
+            "date_time": fields.Datetime.now(),
+            "unit_amount": 0,
+        }
+        if tag_ids:
+            vals["tag_ids"] = [(6, 0, tag_ids)]
+        new_line = self.create(vals)
+        return {
+            "id": new_line.id,
+            "name": new_line.name,
+            "project_id": new_line.project_id.id,
+            "project_name": new_line.project_id.name,
+            "task_id": new_line.task_id.id if new_line.task_id else False,
+            "task_name": new_line.task_id.name if new_line.task_id else "",
+            "date_time": fields.Datetime.to_string(new_line.date_time),
+            "tag_ids": new_line.tag_ids.ids,
+            "tag_names": new_line.tag_ids.mapped("name"),
+        }
+
+    @api.model
+    def stop_running_timer(self):
+        """Stop the current user's running timer and return the result."""
+        running = self.search(self._running_domain(), limit=1)
+        if not running:
+            return False
+        end = datetime.now()
+        duration = running._duration(running.date_time, end)
+        running.write({"unit_amount": duration})
+        return {
+            "id": running.id,
+            "duration": duration,
+        }
+
+    @api.model
+    def get_timer_projects(self):
+        """Return list of projects available for timer."""
+        projects = self.env["project.project"].search(
+            [("allow_timesheets", "=", True)], order="name", limit=100
+        )
+        return [{"id": p.id, "name": p.name} for p in projects]
+
+    @api.model
+    def get_timer_tasks(self, project_id):
+        """Return tasks for a given project."""
+        domain = [
+            ("project_id", "=", project_id),
+            ("project_id.allow_timesheets", "=", True),
+        ]
+        tasks = self.env["project.task"].search(domain, order="name", limit=100)
+        return [{"id": t.id, "name": t.name} for t in tasks]
+
+    @api.model
+    def get_timer_tags(self):
+        """Return all available tags."""
+        tags = self.env["hr.timesheet.tag"].search([], order="name")
+        return [{"id": t.id, "name": t.name, "color": t.color} for t in tags]

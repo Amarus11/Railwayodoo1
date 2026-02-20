@@ -2,6 +2,9 @@
 <templates xml:space="preserve">
     <t t-name="project_timesheet_time_control.TimesheetDashboard">
         <div class="o_timesheet_dashboard o_action">
+            <!-- Timer Header Bar (Toggl-style) -->
+            <TimesheetTimerHeader/>
+
             <div class="container-fluid py-3">
                 <!-- Header -->
                 <div class="row mb-4 align-items-center">

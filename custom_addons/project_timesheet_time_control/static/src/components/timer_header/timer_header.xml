@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="project_timesheet_time_control.TimesheetTimerHeader">
+        <div class="o_timer_header" t-att-class="state.isRunning ? 'o_timer_running' : ''">
+            <div class="o_timer_header_inner">
+                <!-- Description input (Feature 2) -->
+                <div class="o_timer_description">
+                    <input type="text"
+                           t-ref="descriptionInput"
+                           class="o_timer_desc_input"
+                           t-att-value="state.description"
+                           t-on-input="onDescriptionInput"
+                           t-on-keydown="onDescriptionKeydown"
+                           placeholder="What are you working on?"
+                           t-att-disabled="state.isRunning"/>
+                </div>
+
+                <!-- Project selector -->
+                <div class="o_timer_selector o_timer_project_selector">
+                    <button class="o_timer_selector_btn"
+                            t-on-click="toggleProjectDropdown"
+                            t-att-disabled="state.isRunning"
+                            t-att-title="state.projectName || 'Select Project'">
+                        <i class="fa fa-folder-o me-1"/>
+                        <span class="o_timer_selector_text"
+                              t-esc="state.projectName || 'Project'"/>
+                        <i class="fa fa-caret-down ms-1"/>
+                    </button>
+                    <t t-if="state.projectId and !state.isRunning">
+                        <button class="o_timer_clear_btn" t-on-click="clearProject" title="Clear project">
+                            <i class="fa fa-times"/>
+                        </button>
+                    </t>
+                    <!-- Project dropdown -->
+                    <div t-if="state.showProjectDropdown" class="o_timer_dropdown">
+                        <div class="o_timer_dropdown_search">
+                            <input type="text" placeholder="Search projects..."
+                                   t-att-value="state.projectSearch"
+                                   t-on-input="onProjectSearchInput"
+                                   class="o_timer_dropdown_input"/>
+                        </div>
+                        <div class="o_timer_dropdown_list">
+                            <t t-foreach="filteredProjects" t-as="project" t-key="project.id">
+                                <div class="o_timer_dropdown_item"
+                                     t-att-class="state.projectId === project.id ? 'active' : ''"
+                                     t-on-click="() => this.selectProject(project)">
+                                    <i class="fa fa-folder-o me-2 text-muted"/>
+                                    <span t-esc="project.name"/>
+                                </div>
+                            </t>
+                            <div t-if="!filteredProjects.length" class="o_timer_dropdown_empty">
+                                No projects found
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task selector -->
+                <div class="o_timer_selector o_timer_task_selector">
+                    <button class="o_timer_selector_btn"
+                            t-on-click="toggleTaskDropdown"
+                            t-att-disabled="state.isRunning || !state.projectId"
+                            t-att-title="state.taskName || 'Select Task'">
+                        <i class="fa fa-tasks me-1"/>
+                        <span class="o_timer_selector_text"
+                              t-esc="state.taskName || 'Task'"/>
+                        <i class="fa fa-caret-down ms-1"/>
+                    </button>
+                    <t t-if="state.taskId and !state.isRunning">
+                        <button class="o_timer_clear_btn" t-on-click="clearTask" title="Clear task">
+                            <i class="fa fa-times"/>
+                        </button>
+                    </t>
+                    <!-- Task dropdown -->
+                    <div t-if="state.showTaskDropdown" class="o_timer_dropdown">
+                        <div class="o_timer_dropdown_search">
+                            <input type="text" placeholder="Search tasks..."
+                                   t-att-value="state.taskSearch"
+                                   t-on-input="onTaskSearchInput"
+                                   class="o_timer_dropdown_input"/>
+                        </div>
+                        <div class="o_timer_dropdown_list">
+                            <t t-foreach="filteredTasks" t-as="task" t-key="task.id">
+                                <div class="o_timer_dropdown_item"
+                                     t-att-class="state.taskId === task.id ? 'active' : ''"
+                                     t-on-click="() => this.selectTask(task)">
+                                    <i class="fa fa-check-square-o me-2 text-muted"/>
+                                    <span t-esc="task.name"/>
+                                </div>
+                            </t>
+                            <div t-if="!filteredTasks.length" class="o_timer_dropdown_empty">
+                                No tasks found
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags selector (Feature 8) -->
+                <div class="o_timer_selector o_timer_tag_selector">
+                    <button class="o_timer_selector_btn o_timer_tag_btn"
+                            t-on-click="toggleTagDropdown"
+                            t-att-disabled="state.isRunning">
+                        <i class="fa fa-tags me-1"/>
+                        <t t-if="state.tagNames.length">
+                            <t t-foreach="state.tagNames" t-as="tname" t-key="tname_index">
+                                <span class="o_timer_tag_badge"
+                                      t-att-style="'background-color:' + getTagColor(tname_index)">
+                                    <t t-esc="tname"/>
+                                    <i class="fa fa-times ms-1 o_timer_tag_remove"
+                                       t-on-click.stop="() => this.removeTag(state.tagIds[tname_index])"/>
+                                </span>
+                            </t>
+                        </t>
+                        <span t-else="" class="o_timer_selector_text">Tags</span>
+                        <i class="fa fa-caret-down ms-1"/>
+                    </button>
+                    <!-- Tag dropdown -->
+                    <div t-if="state.showTagDropdown" class="o_timer_dropdown o_timer_tag_dropdown">
+                        <div class="o_timer_dropdown_search">
+                            <input type="text" placeholder="Search or create tag..."
+                                   t-att-value="state.tagSearch"
+                                   t-on-input="onTagSearchInput"
+                                   t-on-keydown="onCreateTag"
+                                   class="o_timer_dropdown_input"/>
+                        </div>
+                        <div class="o_timer_dropdown_list">
+                            <t t-foreach="filteredTags" t-as="tag" t-key="tag.id">
+                                <div class="o_timer_dropdown_item o_timer_tag_item"
+                                     t-on-click="() => this.toggleTag(tag)">
+                                    <span class="o_timer_tag_color_dot"
+                                          t-att-style="'background-color:' + getTagColor(tag.color)"/>
+                                    <span t-esc="tag.name" class="flex-grow-1"/>
+                                    <i t-if="isTagSelected(tag.id)"
+                                       class="fa fa-check text-success"/>
+                                </div>
+                            </t>
+                            <div t-if="state.tagSearch and !filteredTags.length"
+                                 class="o_timer_dropdown_empty">
+                                Press Enter to create "<t t-esc="state.tagSearch"/>"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Favorites (Feature 3) -->
+                <div class="o_timer_selector o_timer_fav_selector">
+                    <button class="o_timer_fav_btn" t-on-click="toggleFavoriteDropdown"
+                            title="Favorites">
+                        <i class="fa fa-star"/>
+                    </button>
+                    <t t-if="!state.isRunning and state.projectId">
+                        <button class="o_timer_fav_save_btn" t-on-click="saveFavorite"
+                                title="Save current as favorite">
+                            <i class="fa fa-star-o"/>
+                            <i class="fa fa-plus o_timer_fav_plus"/>
+                        </button>
+                    </t>
+                    <!-- Favorites dropdown -->
+                    <div t-if="state.showFavoriteDropdown" class="o_timer_dropdown o_timer_fav_dropdown">
+                        <div class="o_timer_dropdown_header">
+                            <i class="fa fa-star me-1 text-warning"/>
+                            <strong>Favorites</strong>
+                        </div>
+                        <div class="o_timer_dropdown_list">
+                            <t t-foreach="state.favorites" t-as="fav" t-key="fav.id">
+                                <div class="o_timer_dropdown_item o_timer_fav_item"
+                                     t-on-click="() => this.useFavorite(fav)">
+                                    <div class="o_timer_fav_info">
+                                        <div class="o_timer_fav_name" t-esc="fav.name"/>
+                                        <div class="o_timer_fav_meta">
+                                            <span class="text-muted">
+                                                <i class="fa fa-folder-o me-1"/>
+                                                <t t-esc="fav.project_name"/>
+                                            </span>
+                                            <span t-if="fav.task_name" class="text-muted ms-2">
+                                                <i class="fa fa-tasks me-1"/>
+                                                <t t-esc="fav.task_name"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button class="o_timer_fav_delete"
+                                            t-on-click="(ev) => this.deleteFavorite(ev, fav.id)"
+                                            title="Remove favorite">
+                                        <i class="fa fa-trash-o"/>
+                                    </button>
+                                </div>
+                            </t>
+                            <div t-if="!state.favorites.length" class="o_timer_dropdown_empty">
+                                <i class="fa fa-info-circle me-1"/>
+                                No favorites yet. Start a timer and click
+                                <i class="fa fa-star-o mx-1"/> to save.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer display + Start/Stop button -->
+                <div class="o_timer_controls">
+                    <div class="o_timer_elapsed" t-att-class="state.isRunning ? 'o_timer_elapsed_running' : ''">
+                        <t t-esc="state.elapsedText"/>
+                    </div>
+                    <button class="o_timer_toggle_btn"
+                            t-att-class="state.isRunning ? 'o_timer_stop_btn' : 'o_timer_start_btn'"
+                            t-on-click="onToggleTimer"
+                            t-att-title="state.isRunning ? 'Stop (Ctrl+Shift+T)' : 'Start (Ctrl+Shift+T)'">
+                        <i t-att-class="state.isRunning ? 'fa fa-stop fa-lg' : 'fa fa-play fa-lg'"/>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Keyboard shortcut hint -->
+            <div class="o_timer_shortcut_hint">
+                <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> to start/stop
+            </div>
+
+            <!-- Idle detection dialog (Feature 5) -->
+            <div t-if="state.idleDialogVisible" class="o_timer_idle_overlay">
+                <div class="o_timer_idle_dialog">
+                    <div class="o_timer_idle_header">
+                        <i class="fa fa-exclamation-triangle text-warning me-2"/>
+                        <strong>You seem to be idle</strong>
+                    </div>
+                    <div class="o_timer_idle_body">
+                        <p>No activity detected for approximately <strong t-esc="idleTimeText"/>.</p>
+                        <p>What would you like to do with the idle time?</p>
+                    </div>
+                    <div class="o_timer_idle_actions">
+                        <button class="btn btn-success btn-sm me-2" t-on-click="onIdleKeep">
+                            <i class="fa fa-check me-1"/>Keep time &amp; continue
+                        </button>
+                        <button class="btn btn-warning btn-sm me-2" t-on-click="onIdleDiscard">
+                            <i class="fa fa-scissors me-1"/>Discard idle time
+                        </button>
+                        <button class="btn btn-danger btn-sm" t-on-click="onIdleStopKeep">
+                            <i class="fa fa-stop me-1"/>Stop timer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

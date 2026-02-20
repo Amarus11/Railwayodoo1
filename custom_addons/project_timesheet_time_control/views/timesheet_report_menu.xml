@@ -15,6 +15,25 @@
         groups="hr_timesheet.group_hr_timesheet_user"
         sequence="1"
     />
+
+    <!-- Calendar menu -->
+    <record id="timesheet_calendar_action" model="ir.actions.act_window">
+        <field name="name">Timesheet Calendar</field>
+        <field name="res_model">account.analytic.line</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="view_id" ref="view_calendar_account_analytic_line"/>
+        <field name="domain">[('project_id', '!=', False)]</field>
+        <field name="context">{'search_default_mine': 1}</field>
+    </record>
+    <menuitem
+        id="menu_timesheet_calendar"
+        name="Calendar"
+        parent="hr_timesheet.menu_hr_time_tracking"
+        action="timesheet_calendar_action"
+        groups="hr_timesheet.group_hr_timesheet_user"
+        sequence="15"
+    />
+
     <!-- Analysis menu -->
     <menuitem
         id="menu_timesheet_analysis"
@@ -23,5 +42,30 @@
         action="timesheet_time_report_action"
         groups="hr_timesheet.group_hr_timesheet_user"
         sequence="30"
+    />
+
+    <!-- Configuration submenu -->
+    <menuitem
+        id="menu_timesheet_config"
+        name="Configuration"
+        parent="hr_timesheet.menu_hr_time_tracking"
+        groups="hr_timesheet.group_timesheet_manager"
+        sequence="90"
+    />
+    <menuitem
+        id="menu_timesheet_tags"
+        name="Tags"
+        parent="menu_timesheet_config"
+        action="hr_timesheet_tag_action"
+        groups="hr_timesheet.group_timesheet_manager"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_timesheet_favorites"
+        name="My Favorites"
+        parent="hr_timesheet.menu_hr_time_tracking"
+        action="hr_timesheet_favorite_action"
+        groups="hr_timesheet.group_hr_timesheet_user"
+        sequence="25"
     />
 </odoo>

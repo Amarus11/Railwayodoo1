@@ -48,6 +48,10 @@ class HrTimesheetSwitch(models.TransientModel):
             ]
         """,
     )
+    tag_ids = fields.Many2many(
+        comodel_name="hr.timesheet.tag",
+        string="Tags",
+    )
     project_id = fields.Many2one(
         comodel_name="project.project",
         string="Project",
@@ -156,6 +160,7 @@ class HrTimesheetSwitch(models.TransientModel):
             "name": account_analytic_line.name,
             "project_id": account_analytic_line.project_id.id,
             "task_id": account_analytic_line.task_id.id,
+            "tag_ids": [(6, 0, account_analytic_line.tag_ids.ids)],
         }
 
     @api.model
@@ -175,6 +180,7 @@ class HrTimesheetSwitch(models.TransientModel):
             "date_time_end": record.date_time_end,
             "project_id": record.project_id.id,
             "task_id": record.task_id.id,
+            "tag_ids": [(6, 0, record.tag_ids.ids)],
             "unit_amount": 0,
         }
 
