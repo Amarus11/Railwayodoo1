@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══ WORKSPACE VIEWS ═══ -->
+
+    <!-- Kanban: Tarjetas de workspace como drives compartidos -->
+    <record id="knowledge_workspace_view_kanban" model="ir.ui.view">
+        <field name="name">knowledge.workspace.kanban</field>
+        <field name="model">knowledge.workspace</field>
+        <field name="arch" type="xml">
+            <kanban class="o_syntropy_workspace_kanban">
+                <field name="name"/>
+                <field name="icon"/>
+                <field name="description"/>
+                <field name="folder_count"/>
+                <field name="document_count"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_ws_card d-flex flex-column p-3" style="min-height: 140px; cursor: pointer;">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span t-out="record.icon.value" style="font-size: 2.2em;"/>
+                                <div>
+                                    <strong class="fs-5 d-block"><field name="name"/></strong>
+                                </div>
+                            </div>
+                            <div class="text-muted small mt-auto" t-if="record.description.raw_value">
+                                <field name="description"/>
+                            </div>
+                            <div class="d-flex gap-3 mt-2 text-muted small">
+                                <span><i class="fa fa-folder me-1"/><field name="folder_count"/> carpetas</span>
+                                <span><i class="fa fa-file me-1"/><field name="document_count"/> docs</span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- List -->
+    <record id="knowledge_workspace_view_list" model="ir.ui.view">
+        <field name="name">knowledge.workspace.list</field>
+        <field name="model">knowledge.workspace</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="icon"/>
+                <field name="name"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="folder_count"/>
+                <field name="document_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="knowledge_workspace_view_form" model="ir.ui.view">
+        <field name="name">knowledge.workspace.form</field>
+        <field name="model">knowledge.workspace</field>
+        <field name="arch" type="xml">
+            <form string="Workspace">
+                <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button name="action_open_workspace" type="object"
+                            class="oe_stat_button" icon="fa-file-text-o">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="document_count"/></span>
+                                <span class="o_stat_text">Documentos</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archivado" bg_color="bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="icon" class="d-inline me-2" style="font-size: 1.5em;"/>
+                            <field name="name" placeholder="Nombre del workspace"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="color" widget="color_picker"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Descripción del workspace..."/>
+                    <notebook>
+                        <page string="Miembros" name="members">
+                            <field name="member_ids" widget="many2many_tags"
+                                options="{'color_field': 'color'}"/>
+                        </page>
+                        <page string="Carpetas" name="folders">
+                            <field name="folder_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="icon"/>
+                                    <field name="name"/>
+                                    <field name="document_count"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="knowledge_workspace_view_search" model="ir.ui.view">
+        <field name="name">knowledge.workspace.search</field>
+        <field name="model">knowledge.workspace</field>
+        <field name="arch" type="xml">
+            <search string="Buscar workspaces">
+                <field name="name"/>
+                <field name="owner_id"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="knowledge_workspace_action" model="ir.actions.act_window">
+        <field name="name">Workspaces</field>
+        <field name="res_model">knowledge.workspace</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="knowledge_workspace_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea tu primer Workspace
+            </p>
+            <p>Los workspaces son unidades compartidas para organizar documentos por equipo o proyecto.</p>
+        </field>
+    </record>
+
+</odoo>

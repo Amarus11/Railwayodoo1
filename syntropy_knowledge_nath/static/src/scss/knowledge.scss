@@ -1,0 +1,300 @@
+/* ══════════════════════════════════════════════════════════════
+   Syntropy Docs — Drive-like Backend Styles
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+    --docs-primary: #4285f4;
+    --docs-primary-dark: #3367d6;
+    --docs-green: #0f9d58;
+    --docs-yellow: #f4b400;
+    --docs-red: #db4437;
+    --docs-tile-radius: 8px;
+    --docs-tile-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+    --docs-tile-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Document Kanban — Drive Tiles ────────────────────────── */
+.o_docs_kanban .o_kanban_record {
+    border-radius: var(--docs-tile-radius);
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+
+    &:hover {
+        box-shadow: var(--docs-tile-hover-shadow);
+        transform: translateY(-2px);
+    }
+}
+
+/* Tile thumbnail area */
+.o_doc_tile {
+    position: relative;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.o_doc_tile .o_doc_icon {
+    font-size: 3rem;
+    opacity: 0.7;
+}
+
+.o_doc_tile .o_doc_thumbnail {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+/* Tile info area */
+.o_doc_info {
+    padding: 10px 12px;
+}
+
+.o_doc_info .o_doc_name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.o_doc_info .o_doc_meta {
+    font-size: 0.75rem;
+    color: #5f6368;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.o_doc_info .o_doc_meta .o_doc_type_badge {
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Type-specific colors */
+.o_doc_type_document { color: var(--docs-primary); }
+.o_doc_type_spreadsheet { color: var(--docs-green); }
+.o_doc_type_note { color: var(--docs-yellow); }
+.o_doc_type_file { color: #5f6368; }
+.o_doc_type_link { color: #8e24aa; }
+.o_doc_type_template { color: #e91e63; }
+
+.o_doc_type_badge.bg-document { background: #e8f0fe; color: var(--docs-primary); }
+.o_doc_type_badge.bg-spreadsheet { background: #e6f4ea; color: var(--docs-green); }
+.o_doc_type_badge.bg-note { background: #fef7e0; color: #e37400; }
+.o_doc_type_badge.bg-file { background: #f1f3f4; color: #5f6368; }
+.o_doc_type_badge.bg-link { background: #f3e8fd; color: #8e24aa; }
+.o_doc_type_badge.bg-template { background: #fce4ec; color: #c2185b; }
+
+/* Favorite star on tile */
+.o_doc_tile .o_doc_favorite {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.o_docs_kanban .o_kanban_record:hover .o_doc_favorite {
+    opacity: 1;
+}
+
+/* State badge */
+.o_doc_state_draft { border-left: 3px solid #5f6368; }
+.o_doc_state_review { border-left: 3px solid var(--docs-yellow); }
+.o_doc_state_published { border-left: 3px solid var(--docs-green); }
+.o_doc_state_archived { border-left: 3px solid var(--docs-red); }
+
+/* ── Workspace Kanban ─────────────────────────────────────── */
+.o_workspace_kanban .o_kanban_record {
+    border-radius: var(--docs-tile-radius);
+    text-align: center;
+    padding: 20px 16px;
+    transition: box-shadow 0.2s, transform 0.15s;
+
+    &:hover {
+        box-shadow: var(--docs-tile-hover-shadow);
+        transform: translateY(-2px);
+    }
+
+    .o_workspace_icon {
+        font-size: 2.5rem;
+        margin-bottom: 8px;
+    }
+
+    .o_workspace_name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .o_workspace_stats {
+        font-size: 0.75rem;
+        color: #5f6368;
+        margin-top: 4px;
+    }
+}
+
+/* ── Folder Kanban ────────────────────────────────────────── */
+.o_folder_kanban .o_kanban_record {
+    border-radius: var(--docs-tile-radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s, box-shadow 0.2s;
+
+    &:hover {
+        background: #f1f3f4;
+        box-shadow: var(--docs-tile-shadow);
+    }
+
+    .o_folder_icon {
+        font-size: 1.8rem;
+        flex-shrink: 0;
+    }
+
+    .o_folder_name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        flex-grow: 1;
+    }
+
+    .o_folder_count {
+        font-size: 0.75rem;
+        color: #5f6368;
+    }
+}
+
+/* ── Breadcrumb bar in folder form ────────────────────────── */
+.o_folder_breadcrumb {
+    background: #f8f9fa;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: #80868b;
+    }
+}
+
+/* ── Document form — content area ─────────────────────────── */
+.o_form_view .o_docs_content_area {
+    min-height: 450px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    padding: 24px;
+    background: #fff;
+}
+
+.o_form_view .o_docs_content_area .note-editable {
+    min-height: 400px;
+}
+
+/* ── File preview in form ─────────────────────────────────── */
+.o_docs_file_preview {
+    text-align: center;
+    padding: 24px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px dashed #dadce0;
+
+    img {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 6px;
+        box-shadow: var(--docs-tile-shadow);
+    }
+}
+
+/* ── Link preview card ────────────────────────────────────── */
+.o_docs_link_preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dadce0;
+
+    .o_link_icon {
+        font-size: 2rem;
+        color: var(--docs-primary);
+    }
+
+    .o_link_url {
+        font-size: 0.85rem;
+        color: #5f6368;
+        word-break: break-all;
+    }
+}
+
+/* ── Stat buttons ─────────────────────────────────────────── */
+.o_form_view .oe_button_box .oe_stat_button .o_stat_value {
+    font-weight: 700;
+}
+
+/* ── Tags ─────────────────────────────────────────────────── */
+.o_field_many2many_tags .badge {
+    font-size: 0.75em;
+    border-radius: 12px;
+}
+
+/* ── Favorite star ────────────────────────────────────────── */
+.o_field_boolean_favorite .o_favorite {
+    font-size: 1.2em;
+}
+
+/* ── Version history ──────────────────────────────────────── */
+.o_list_view .btn-link[name="action_restore_version"] {
+    color: var(--docs-primary);
+    font-weight: 600;
+
+    &:hover {
+        color: var(--docs-primary-dark);
+    }
+}
+
+/* ── Empty states ─────────────────────────────────────────── */
+.o_view_nocontent .o_view_nocontent_smiling_face {
+    font-size: 1.2em;
+}
+
+/* ── Priority stars ───────────────────────────────────────── */
+.o_priority .o_priority_star {
+    font-size: 1.1em;
+}
+
+/* ── Quick-create highlight ───────────────────────────────── */
+.o_docs_kanban .o_kanban_quick_create {
+    border: 2px dashed var(--docs-primary);
+    border-radius: var(--docs-tile-radius);
+    background: #e8f0fe;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .o_docs_kanban .o_kanban_record {
+        margin-bottom: 8px;
+    }
+
+    .o_doc_tile {
+        min-height: 80px;
+    }
+
+    .o_workspace_kanban .o_kanban_record {
+        padding: 12px;
+    }
+}

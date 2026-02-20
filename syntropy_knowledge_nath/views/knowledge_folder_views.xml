@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══ FOLDER VIEWS ═══ -->
+
+    <!-- Kanban: Carpetas como tiles tipo Drive -->
+    <record id="knowledge_folder_view_kanban" model="ir.ui.view">
+        <field name="name">knowledge.folder.kanban</field>
+        <field name="model">knowledge.folder</field>
+        <field name="arch" type="xml">
+            <kanban class="o_syntropy_folder_kanban">
+                <field name="name"/>
+                <field name="icon"/>
+                <field name="document_count"/>
+                <field name="subfolder_count"/>
+                <field name="color"/>
+                <field name="full_path"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_folder_tile d-flex align-items-center gap-3 p-3">
+                            <span t-out="record.icon.value" style="font-size: 2.5em;"/>
+                            <div class="flex-grow-1">
+                                <strong class="d-block"><field name="name"/></strong>
+                                <small class="text-muted">
+                                    <span t-if="record.subfolder_count.raw_value > 0">
+                                        <field name="subfolder_count"/> subcarpetas ·
+                                    </span>
+                                    <field name="document_count"/> documentos
+                                </small>
+                            </div>
+                            <i class="fa fa-chevron-right text-muted"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- List -->
+    <record id="knowledge_folder_view_list" model="ir.ui.view">
+        <field name="name">knowledge.folder.list</field>
+        <field name="model">knowledge.folder</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="icon"/>
+                <field name="name"/>
+                <field name="full_path"/>
+                <field name="workspace_id"/>
+                <field name="parent_id"/>
+                <field name="document_count"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="knowledge_folder_view_form" model="ir.ui.view">
+        <field name="name">knowledge.folder.form</field>
+        <field name="model">knowledge.folder</field>
+        <field name="arch" type="xml">
+            <form string="Carpeta">
+                <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button name="action_open_folder" type="object"
+                            class="oe_stat_button" icon="fa-file-text-o">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="document_count"/></span>
+                                <span class="o_stat_text">Documentos</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archivada" bg_color="bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="icon" class="d-inline me-2" style="font-size: 1.5em;"/>
+                            <field name="name" placeholder="Nombre de la carpeta"/>
+                        </h1>
+                    </div>
+                    <!-- Breadcrumb visual -->
+                    <div class="alert alert-light border-0 py-1 px-2" style="background: #f8f9fa;">
+                        <i class="fa fa-map-marker me-1"/>
+                        <field name="full_path" class="d-inline"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="workspace_id"/>
+                            <field name="parent_id" domain="[('workspace_id', '=', workspace_id)]"/>
+                        </group>
+                        <group>
+                            <field name="color" widget="color_picker"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Descripción..."/>
+                    <notebook>
+                        <page string="Subcarpetas" name="subfolders">
+                            <field name="child_ids">
+                                <list>
+                                    <field name="icon"/>
+                                    <field name="name"/>
+                                    <field name="document_count"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Documentos" name="documents">
+                            <field name="document_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="doc_type"/>
+                                    <field name="state" widget="badge"
+                                        decoration-success="state == 'published'"
+                                        decoration-warning="state == 'review'"
+                                        decoration-info="state == 'draft'"
+                                    />
+                                    <field name="author_id" widget="many2one_avatar_user"/>
+                                    <field name="write_date"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="knowledge_folder_view_search" model="ir.ui.view">
+        <field name="name">knowledge.folder.search</field>
+        <field name="model">knowledge.folder</field>
+        <field name="arch" type="xml">
+            <search string="Buscar carpetas">
+                <field name="name"/>
+                <field name="workspace_id"/>
+                <field name="parent_id"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Workspace" name="group_workspace" context="{'group_by': 'workspace_id'}"/>
+                    <filter string="Carpeta padre" name="group_parent" context="{'group_by': 'parent_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="knowledge_folder_action" model="ir.actions.act_window">
+        <field name="name">Carpetas</field>
+        <field name="res_model">knowledge.folder</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="knowledge_folder_view_search"/>
+        <field name="context">{'search_default_group_workspace': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Crea tu primera carpeta</p>
+            <p>Organiza tus documentos en carpetas como en Google Drive.</p>
+        </field>
+    </record>
+
+</odoo>

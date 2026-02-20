@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- ════════════════════════════════════════════════════════════
+         DATOS INICIALES — SYNTROPY DOCS
+         ════════════════════════════════════════════════════════════ -->
+
+    <!-- ═══ Etiquetas predeterminadas ═══ -->
+    <record id="tag_important" model="knowledge.tag">
+        <field name="name">Importante</field>
+        <field name="color">1</field>
+    </record>
+
+    <record id="tag_tutorial" model="knowledge.tag">
+        <field name="name">Tutorial</field>
+        <field name="color">2</field>
+    </record>
+
+    <record id="tag_reference" model="knowledge.tag">
+        <field name="name">Referencia</field>
+        <field name="color">4</field>
+    </record>
+
+    <record id="tag_howto" model="knowledge.tag">
+        <field name="name">Cómo hacer</field>
+        <field name="color">5</field>
+    </record>
+
+    <record id="tag_best_practice" model="knowledge.tag">
+        <field name="name">Buena práctica</field>
+        <field name="color">10</field>
+    </record>
+
+    <record id="tag_draft" model="knowledge.tag">
+        <field name="name">En progreso</field>
+        <field name="color">3</field>
+    </record>
+
+    <!-- ═══ Workspace principal ═══ -->
+    <record id="workspace_main" model="knowledge.workspace">
+        <field name="name">Syntropy</field>
+        <field name="icon">🏢</field>
+        <field name="description">Workspace principal de la organización</field>
+    </record>
+
+    <!-- ═══ Carpetas base ═══ -->
+    <record id="folder_general" model="knowledge.folder">
+        <field name="name">General</field>
+        <field name="icon">📚</field>
+        <field name="workspace_id" ref="workspace_main"/>
+    </record>
+
+    <record id="folder_processes" model="knowledge.folder">
+        <field name="name">Procesos</field>
+        <field name="icon">⚙️</field>
+        <field name="workspace_id" ref="workspace_main"/>
+    </record>
+
+    <record id="folder_policies" model="knowledge.folder">
+        <field name="name">Políticas</field>
+        <field name="icon">📋</field>
+        <field name="workspace_id" ref="workspace_main"/>
+    </record>
+
+    <record id="folder_tech" model="knowledge.folder">
+        <field name="name">Tecnología</field>
+        <field name="icon">💻</field>
+        <field name="workspace_id" ref="workspace_main"/>
+    </record>
+
+    <record id="folder_onboarding" model="knowledge.folder">
+        <field name="name">Onboarding</field>
+        <field name="icon">🚀</field>
+        <field name="workspace_id" ref="workspace_main"/>
+    </record>
+
+    <record id="folder_faq" model="knowledge.folder">
+        <field name="name">FAQ</field>
+        <field name="icon">❓</field>
+        <field name="workspace_id" ref="workspace_main"/>
+    </record>
+
+    <!-- ═══ Documento de bienvenida ═══ -->
+    <record id="doc_welcome" model="knowledge.document">
+        <field name="name">Bienvenido a Syntropy Docs</field>
+        <field name="doc_type">document</field>
+        <field name="workspace_id" ref="workspace_main"/>
+        <field name="folder_id" ref="folder_general"/>
+        <field name="tag_ids" eval="[(4, ref('tag_important'))]"/>
+        <field name="state">published</field>
+        <field name="content"><![CDATA[
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>👋 ¡Bienvenido a Syntropy Docs!</h2>
+            <p class="lead">
+                Tu espacio centralizado para documentar, compartir y encontrar todo
+                el conocimiento de la organización — inspirado en Google Drive.
+            </p>
+            <hr/>
+
+            <h3>🎯 ¿Qué puedes hacer aquí?</h3>
+            <ul>
+                <li><strong>Crear documentos</strong> — Documentos enriquecidos con editor visual</li>
+                <li><strong>Hojas de cálculo</strong> — Tablas y datos tabulares</li>
+                <li><strong>Notas rápidas</strong> — Ideas y anotaciones al instante</li>
+                <li><strong>Subir archivos</strong> — PDFs, imágenes, presentaciones</li>
+                <li><strong>Enlaces</strong> — Accesos rápidos a recursos externos</li>
+                <li><strong>Organizar en carpetas</strong> — Estructura jerárquica flexible</li>
+                <li><strong>Workspaces</strong> — Espacios compartidos por equipo o proyecto</li>
+                <li><strong>Marcar favoritos ★</strong> — Acceso rápido a lo más importante</li>
+            </ul>
+
+            <h3>📝 Flujo de trabajo</h3>
+            <ol>
+                <li><strong>Borrador</strong> → Crea y edita libremente</li>
+                <li><strong>En Revisión</strong> → Envía para aprobación del equipo</li>
+                <li><strong>Publicado</strong> → Disponible para toda la organización</li>
+            </ol>
+
+            <h3>📁 Carpetas disponibles</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Carpeta</th>
+                        <th>Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>📚 General</td><td>Conocimiento general de la organización</td></tr>
+                    <tr><td>⚙️ Procesos</td><td>Documentación de procesos internos</td></tr>
+                    <tr><td>📋 Políticas</td><td>Normativas y políticas corporativas</td></tr>
+                    <tr><td>💻 Tecnología</td><td>Guías técnicas y documentación de TI</td></tr>
+                    <tr><td>🚀 Onboarding</td><td>Material de bienvenida e inducción</td></tr>
+                    <tr><td>❓ FAQ</td><td>Preguntas frecuentes y respuestas</td></tr>
+                </tbody>
+            </table>
+
+            <div class="alert alert-info">
+                <strong>💡 Tip:</strong> Usa el menú <em>+ Nuevo</em> para crear documentos de cualquier tipo.
+                Las vistas Kanban te muestran los archivos como tarjetas al estilo Google Drive.
+            </div>
+        </div>
+    </div>
+</div>
+        ]]></field>
+    </record>
+
+</odoo>

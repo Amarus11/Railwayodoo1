@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════════
+         TAG VIEWS
+         ════════════════════════════════════════════════════════════ -->
+
+    <!-- Tree View -->
+    <record id="knowledge_tag_view_list" model="ir.ui.view">
+        <field name="name">knowledge.tag.list</field>
+        <field name="model">knowledge.tag</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+                <field name="article_count" string="Documentos"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="knowledge_tag_view_form" model="ir.ui.view">
+        <field name="name">knowledge.tag.form</field>
+        <field name="model">knowledge.tag</field>
+        <field name="arch" type="xml">
+            <form string="Etiqueta">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="color" widget="color_picker"/>
+                        </group>
+                        <group>
+                            <field name="article_count" string="Documentos"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="knowledge_tag_view_search" model="ir.ui.view">
+        <field name="name">knowledge.tag.search</field>
+        <field name="model">knowledge.tag</field>
+        <field name="arch" type="xml">
+            <search string="Buscar etiquetas">
+                <field name="name"/>
+                <filter string="Activos" name="active" domain="[('active', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="knowledge_tag_action" model="ir.actions.act_window">
+        <field name="name">Etiquetas</field>
+        <field name="res_model">knowledge.tag</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="knowledge_tag_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea tu primera etiqueta
+            </p>
+            <p>
+                Las etiquetas permiten clasificar documentos de forma transversal.
+            </p>
+        </field>
+    </record>
+
+</odoo>

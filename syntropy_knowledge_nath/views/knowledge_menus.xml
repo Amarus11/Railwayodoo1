@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════════
+         MENÚ PRINCIPAL: SYNTROPY DOCS
+         ════════════════════════════════════════════════════════════ -->
+
+    <!-- Menú raíz -->
+    <menuitem id="menu_knowledge_root"
+        name="Docs"
+        web_icon="syntropy_knowledge_nath,static/description/icon.svg"
+        sequence="45"
+        groups="syntropy_knowledge_nath.group_knowledge_reader"
+    />
+
+    <!-- ═══ Explorador ═══ -->
+    <menuitem id="menu_docs_explorer"
+        name="Explorador"
+        parent="menu_knowledge_root"
+        sequence="10"
+    />
+    <menuitem id="menu_docs_explorer_all"
+        name="Todos los Documentos"
+        parent="menu_docs_explorer"
+        action="knowledge_document_action"
+        sequence="10"
+    />
+    <menuitem id="menu_docs_explorer_my"
+        name="Mis Documentos"
+        parent="menu_docs_explorer"
+        action="knowledge_document_action_my"
+        sequence="20"
+    />
+    <menuitem id="menu_docs_explorer_favorites"
+        name="★ Destacados"
+        parent="menu_docs_explorer"
+        action="knowledge_document_action_favorites"
+        sequence="30"
+    />
+    <menuitem id="menu_docs_explorer_recent"
+        name="Recientes"
+        parent="menu_docs_explorer"
+        action="knowledge_document_action_recent"
+        sequence="40"
+    />
+    <menuitem id="menu_docs_explorer_review"
+        name="Pendientes de Revisión"
+        parent="menu_docs_explorer"
+        action="knowledge_document_action_review"
+        sequence="50"
+        groups="syntropy_knowledge_nath.group_knowledge_manager"
+    />
+    <menuitem id="menu_docs_explorer_templates"
+        name="Plantillas"
+        parent="menu_docs_explorer"
+        action="knowledge_document_action_templates"
+        sequence="60"
+    />
+
+    <!-- ═══ Crear nuevo ═══ -->
+    <menuitem id="menu_docs_new"
+        name="+ Nuevo"
+        parent="menu_knowledge_root"
+        sequence="20"
+        groups="syntropy_knowledge_nath.group_knowledge_editor"
+    />
+    <menuitem id="menu_docs_new_document"
+        name="Documento"
+        parent="menu_docs_new"
+        action="action_new_document"
+        sequence="10"
+    />
+    <menuitem id="menu_docs_new_spreadsheet"
+        name="Hoja de Cálculo"
+        parent="menu_docs_new"
+        action="action_new_spreadsheet"
+        sequence="20"
+    />
+    <menuitem id="menu_docs_new_note"
+        name="Nota Rápida"
+        parent="menu_docs_new"
+        action="action_new_note"
+        sequence="30"
+    />
+    <menuitem id="menu_docs_new_upload"
+        name="Subir Archivo"
+        parent="menu_docs_new"
+        action="action_new_upload"
+        sequence="40"
+    />
+    <menuitem id="menu_docs_new_link"
+        name="Enlace"
+        parent="menu_docs_new"
+        action="action_new_link"
+        sequence="50"
+    />
+
+    <!-- ═══ Configuración ═══ -->
+    <menuitem id="menu_knowledge_config"
+        name="Configuración"
+        parent="menu_knowledge_root"
+        sequence="90"
+        groups="syntropy_knowledge_nath.group_knowledge_manager"
+    />
+    <menuitem id="menu_config_workspaces"
+        name="Workspaces"
+        parent="menu_knowledge_config"
+        action="knowledge_workspace_action"
+        sequence="10"
+    />
+    <menuitem id="menu_config_folders"
+        name="Carpetas"
+        parent="menu_knowledge_config"
+        action="knowledge_folder_action"
+        sequence="20"
+    />
+    <menuitem id="menu_config_tags"
+        name="Etiquetas"
+        parent="menu_knowledge_config"
+        action="knowledge_tag_action"
+        sequence="30"
+    />
+
+</odoo>

@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════════
+         DOCUMENT VIEWS — Google Drive Style
+         ════════════════════════════════════════════════════════════ -->
+
+    <!-- ═══ KANBAN: Vista Drive con tiles y previews ═══ -->
+    <record id="knowledge_document_view_kanban" model="ir.ui.view">
+        <field name="name">knowledge.document.kanban</field>
+        <field name="model">knowledge.document</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="folder_id"
+                    class="o_syntropy_docs_kanban"
+                    records_draggable="1"
+                    quick_create="0"
+                    sample="1">
+                <field name="name"/>
+                <field name="doc_type"/>
+                <field name="state"/>
+                <field name="priority"/>
+                <field name="folder_id"/>
+                <field name="workspace_id"/>
+                <field name="author_id"/>
+                <field name="color"/>
+                <field name="is_favorite"/>
+                <field name="is_pinned"/>
+                <field name="tag_ids"/>
+                <field name="view_count"/>
+                <field name="thumbnail"/>
+                <field name="preview_text"/>
+                <field name="icon_class"/>
+                <field name="file_extension"/>
+                <field name="file_size_display"/>
+                <field name="write_date"/>
+                <field name="doc_type_label"/>
+                <progressbar field="state"
+                    colors='{"draft": "info", "review": "warning", "published": "success", "archived": "muted"}'
+                />
+                <templates>
+                    <t t-name="card">
+                        <!-- Tile tipo Google Drive -->
+                        <div class="o_doc_tile d-flex flex-column"
+                             style="min-height: 200px; position: relative;">
+
+                            <!-- Header: Pin + Favorite -->
+                            <div class="d-flex align-items-center justify-content-between px-2 pt-2">
+                                <div class="d-flex align-items-center gap-1">
+                                    <i t-if="record.is_pinned.raw_value"
+                                       class="fa fa-thumb-tack text-primary" title="Fijado"/>
+                                    <field name="priority" widget="priority"/>
+                                </div>
+                                <field name="is_favorite" widget="boolean_favorite" nolabel="1"/>
+                            </div>
+
+                            <!-- Preview area: thumbnail or icon -->
+                            <div class="o_doc_preview d-flex align-items-center justify-content-center flex-grow-1 py-3">
+                                <t t-if="record.thumbnail.raw_value">
+                                    <field name="thumbnail" widget="image"
+                                        options="{'size': [120, 120]}"
+                                        class="o_doc_thumb"/>
+                                </t>
+                                <t t-else="">
+                                    <i t-att-class="record.icon_class.value"
+                                       style="font-size: 4em; opacity: 0.7;"/>
+                                </t>
+                            </div>
+
+                            <!-- Footer: nombre, tipo, meta -->
+                            <div class="o_doc_info border-top p-2">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i t-att-class="record.icon_class.value" style="font-size: 1.1em;"/>
+                                    <strong class="text-truncate flex-grow-1" style="max-width: 160px;">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <div class="text-muted small text-truncate" t-if="record.preview_text.raw_value">
+                                    <field name="preview_text"/>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <field name="state" widget="badge"
+                                        decoration-success="state == 'published'"
+                                        decoration-warning="state == 'review'"
+                                        decoration-info="state == 'draft'"
+                                        decoration-muted="state == 'archived'"
+                                    />
+                                    <span class="text-muted small">
+                                        <field name="write_date" widget="date"/>
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <field name="tag_ids" widget="many2many_tags"
+                                        options="{'color_field': 'color'}"/>
+                                    <field name="author_id" widget="many2one_avatar_user"
+                                        readonly="1" class="ms-auto"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ═══ LIST: Vista detallada tipo Files ═══ -->
+    <record id="knowledge_document_view_list" model="ir.ui.view">
+        <field name="name">knowledge.document.list</field>
+        <field name="model">knowledge.document</field>
+        <field name="arch" type="xml">
+            <list multi_edit="1"
+                  decoration-muted="state == 'archived'"
+                  decoration-info="state == 'draft'"
+                  decoration-warning="state == 'review'"
+                  decoration-success="state == 'published'">
+                <field name="is_pinned" widget="boolean_toggle" optional="show"/>
+                <field name="is_favorite" widget="boolean_favorite" nolabel="1" optional="show"/>
+                <field name="name" string="Nombre"/>
+                <field name="doc_type" string="Tipo"/>
+                <field name="workspace_id"/>
+                <field name="folder_id"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'published'"
+                    decoration-warning="state == 'review'"
+                    decoration-info="state == 'draft'"
+                    decoration-muted="state == 'archived'"
+                />
+                <field name="priority" widget="priority"/>
+                <field name="author_id" widget="many2one_avatar_user"/>
+                <field name="last_editor_id" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" string="Modificado"/>
+                <field name="file_size_display" string="Tamaño" optional="show"/>
+                <field name="view_count" string="Vistas" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══ FORM: Editor completo por tipo de documento ═══ -->
+    <record id="knowledge_document_view_form" model="ir.ui.view">
+        <field name="name">knowledge.document.form</field>
+        <field name="model">knowledge.document</field>
+        <field name="arch" type="xml">
+            <form string="Documento" class="o_syntropy_doc_form">
+                <header>
+                    <button name="action_draft" string="↩ Borrador"
+                        type="object" invisible="state == 'draft'"
+                        class="btn-secondary"
+                        groups="syntropy_knowledge_nath.group_knowledge_editor"/>
+                    <button name="action_review" string="📤 Enviar a Revisión"
+                        type="object" invisible="state != 'draft'"
+                        class="btn-primary"
+                        groups="syntropy_knowledge_nath.group_knowledge_editor"/>
+                    <button name="action_publish" string="✅ Publicar"
+                        type="object" invisible="state != 'review'"
+                        class="btn-success"
+                        groups="syntropy_knowledge_nath.group_knowledge_manager"/>
+                    <button name="action_archive_doc" string="🗄 Archivar"
+                        type="object" invisible="state == 'archived'"
+                        class="btn-secondary"
+                        groups="syntropy_knowledge_nath.group_knowledge_manager"
+                        confirm="¿Archivar este documento?"/>
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,review,published"/>
+                </header>
+                <sheet>
+                    <!-- Stat buttons -->
+                    <div name="button_box" class="oe_button_box">
+                        <button name="action_view_versions" type="object"
+                            class="oe_stat_button" icon="fa-history"
+                            groups="syntropy_knowledge_nath.group_knowledge_editor">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="version_count"/></span>
+                                <span class="o_stat_text">Versiones</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-eye" disabled="1">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="view_count"/></span>
+                                <span class="o_stat_text">Vistas</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-heart" disabled="1">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="favorite_count"/></span>
+                                <span class="o_stat_text">Favoritos</span>
+                            </div>
+                        </button>
+                        <button name="action_duplicate_as_template" type="object"
+                            class="oe_stat_button" icon="fa-copy"
+                            string="Guardar como Plantilla"
+                            invisible="doc_type == 'template'"
+                            groups="syntropy_knowledge_nath.group_knowledge_editor"/>
+                        <button name="action_create_from_template" type="object"
+                            class="oe_stat_button" icon="fa-plus"
+                            string="Crear desde Plantilla"
+                            invisible="doc_type != 'template'"
+                            groups="syntropy_knowledge_nath.group_knowledge_editor"/>
+                    </div>
+
+                    <widget name="web_ribbon" title="Archivado" bg_color="bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+
+                    <!-- Thumbnail -->
+                    <field name="thumbnail" widget="image" class="oe_avatar" style="z-index:1"/>
+
+                    <!-- Título y metadatos -->
+                    <div class="oe_title">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <field name="is_favorite" widget="boolean_favorite" nolabel="1"/>
+                            <field name="is_pinned" widget="boolean_toggle" nolabel="1"/>
+                        </div>
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Nombre del documento"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="📂 Ubicación">
+                            <field name="doc_type"/>
+                            <field name="workspace_id"/>
+                            <field name="folder_id" domain="[('workspace_id', '=', workspace_id)]"/>
+                            <field name="tag_ids" widget="many2many_tags"
+                                options="{'color_field': 'color', 'no_create_edit': False}"/>
+                        </group>
+                        <group string="👤 Autoría">
+                            <field name="author_id" widget="many2one_avatar_user"/>
+                            <field name="last_editor_id" widget="many2one_avatar_user" readonly="1"/>
+                            <field name="reviewer_id" widget="many2one_avatar_user"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="current_version"/>
+                            <field name="publish_date" invisible="state != 'published'"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- ═══ Tab: Documento (HTML) ═══ -->
+                        <page string="📝 Contenido" name="content"
+                              invisible="doc_type not in ('document', 'template')">
+                            <field name="content" widget="html"
+                                placeholder="Escribe aquí tu documento..."
+                                options="{'collaborative': True, 'codeview': True}"/>
+                        </page>
+
+                        <!-- ═══ Tab: Hoja de cálculo ═══ -->
+                        <page string="📊 Hoja de Cálculo" name="spreadsheet"
+                              invisible="doc_type != 'spreadsheet'">
+                            <div class="alert alert-info border-0 mb-2">
+                                <i class="fa fa-info-circle me-1"/>
+                                Usa el editor HTML para crear y editar tablas. Puedes copiar/pegar desde Excel o Google Sheets.
+                            </div>
+                            <field name="spreadsheet_data" widget="html"
+                                placeholder="Inserta tu tabla aquí... Puedes pegar directamente desde Excel."
+                                options="{'collaborative': True, 'codeview': True}"/>
+                        </page>
+
+                        <!-- ═══ Tab: Nota rápida ═══ -->
+                        <page string="📌 Nota" name="note"
+                              invisible="doc_type != 'note'">
+                            <field name="note_content"
+                                placeholder="Escribe tu nota aquí..."
+                                class="o_syntropy_note_editor"/>
+                        </page>
+
+                        <!-- ═══ Tab: Archivo adjunto ═══ -->
+                        <page string="📎 Archivo" name="file_upload"
+                              invisible="doc_type != 'file'">
+                            <group>
+                                <group>
+                                    <field name="file_data" filename="file_name"/>
+                                    <field name="file_name"/>
+                                </group>
+                                <group>
+                                    <field name="file_size_display" string="Tamaño"/>
+                                    <field name="mime_type"/>
+                                    <field name="file_extension"/>
+                                </group>
+                            </group>
+                            <!-- Vista previa de imagen -->
+                            <div class="text-center mt-3 o_syntropy_file_preview"
+                                 invisible="not file_data">
+                                <field name="file_data" widget="image"
+                                    class="img-fluid rounded shadow-sm"
+                                    style="max-height: 500px;"
+                                    invisible="file_extension not in ('png', 'jpg', 'jpeg', 'gif', 'svg', 'webp')"/>
+                                <div class="alert alert-secondary mt-2 py-2"
+                                     invisible="file_extension in ('png', 'jpg', 'jpeg', 'gif', 'svg', 'webp')">
+                                    <i class="fa fa-download me-2"/>
+                                    Descarga el archivo para visualizarlo:
+                                    <strong><field name="file_name" readonly="1" class="d-inline"/></strong>
+                                    (<field name="file_size_display" readonly="1" class="d-inline"/>)
+                                </div>
+                            </div>
+                        </page>
+
+                        <!-- ═══ Tab: Enlace ═══ -->
+                        <page string="🔗 Enlace" name="link"
+                              invisible="doc_type != 'link'">
+                            <group>
+                                <field name="url" widget="url" placeholder="https://..."/>
+                                <field name="url_description"
+                                    placeholder="Descripción del recurso enlazado..."/>
+                            </group>
+                        </page>
+
+                        <!-- ═══ Tab: Historial de versiones ═══ -->
+                        <page string="📋 Versiones" name="versions"
+                              groups="syntropy_knowledge_nath.group_knowledge_editor">
+                            <field name="version_ids">
+                                <list create="0" edit="0">
+                                    <field name="name"/>
+                                    <field name="version_number"/>
+                                    <field name="doc_type"/>
+                                    <field name="author_id" widget="many2one_avatar_user"/>
+                                    <field name="create_date"/>
+                                    <button name="action_restore_version" type="object"
+                                        string="Restaurar" icon="fa-undo"
+                                        confirm="¿Restaurar esta versión?"
+                                        groups="syntropy_knowledge_nath.group_knowledge_manager"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══ SEARCH: Búsqueda avanzada ═══ -->
+    <record id="knowledge_document_view_search" model="ir.ui.view">
+        <field name="name">knowledge.document.search</field>
+        <field name="model">knowledge.document</field>
+        <field name="arch" type="xml">
+            <search string="Buscar documentos">
+                <field name="name" string="Nombre"/>
+                <field name="content"/>
+                <field name="note_content"/>
+                <field name="workspace_id"/>
+                <field name="folder_id"/>
+                <field name="tag_ids"/>
+                <field name="author_id"/>
+                <separator/>
+                <!-- Filtros por tipo -->
+                <filter string="📝 Documentos" name="type_document"
+                    domain="[('doc_type', '=', 'document')]" icon="fa-file-text-o"/>
+                <filter string="📊 Hojas de cálculo" name="type_spreadsheet"
+                    domain="[('doc_type', '=', 'spreadsheet')]" icon="fa-table"/>
+                <filter string="📌 Notas" name="type_note"
+                    domain="[('doc_type', '=', 'note')]" icon="fa-sticky-note"/>
+                <filter string="📎 Archivos" name="type_file"
+                    domain="[('doc_type', '=', 'file')]" icon="fa-paperclip"/>
+                <filter string="🔗 Enlaces" name="type_link"
+                    domain="[('doc_type', '=', 'link')]" icon="fa-link"/>
+                <filter string="📄 Plantillas" name="type_template"
+                    domain="[('doc_type', '=', 'template')]" icon="fa-copy"/>
+                <separator/>
+                <!-- Filtros por usuario -->
+                <filter string="Mis documentos" name="my_docs"
+                    domain="[('author_id', '=', uid)]"/>
+                <filter string="★ Mis favoritos" name="my_favorites"
+                    domain="[('favorite_ids.user_id', '=', uid)]"/>
+                <filter string="📌 Fijados" name="pinned"
+                    domain="[('is_pinned', '=', True)]"/>
+                <separator/>
+                <!-- Filtros por estado -->
+                <filter string="Borrador" name="state_draft"
+                    domain="[('state', '=', 'draft')]"/>
+                <filter string="En revisión" name="state_review"
+                    domain="[('state', '=', 'review')]"/>
+                <filter string="Publicados" name="state_published"
+                    domain="[('state', '=', 'published')]"/>
+                <filter string="Archivados" name="state_archived"
+                    domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Recientes (7 días)" name="recent"
+                    domain="[('write_date', '>=', (context_today() - datetime.timedelta(days=7)).strftime('%%Y-%%m-%%d'))]"/>
+                <filter string="Prioridad alta" name="priority_high"
+                    domain="[('priority', 'in', ['1', '2'])]"/>
+                <separator/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Tipo" name="group_type"
+                        context="{'group_by': 'doc_type'}"/>
+                    <filter string="Carpeta" name="group_folder"
+                        context="{'group_by': 'folder_id'}"/>
+                    <filter string="Workspace" name="group_workspace"
+                        context="{'group_by': 'workspace_id'}"/>
+                    <filter string="Estado" name="group_state"
+                        context="{'group_by': 'state'}"/>
+                    <filter string="Autor" name="group_author"
+                        context="{'group_by': 'author_id'}"/>
+                    <filter string="Modificado" name="group_date"
+                        context="{'group_by': 'write_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══ ACTIONS ═══ -->
+
+    <!-- Explorador principal (Drive) -->
+    <record id="knowledge_document_action" model="ir.actions.act_window">
+        <field name="name">Explorador</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="knowledge_document_view_search"/>
+        <field name="context">{'search_default_group_folder': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tu espacio de documentos está vacío
+            </p>
+            <p>
+                Crea documentos, hojas de cálculo, sube archivos o guarda enlaces.
+                Organízalos en carpetas como en Google Drive.
+            </p>
+        </field>
+    </record>
+
+    <!-- Mis documentos -->
+    <record id="knowledge_document_action_my" model="ir.actions.act_window">
+        <field name="name">Mis Documentos</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="knowledge_document_view_search"/>
+        <field name="context">{'search_default_my_docs': 1}</field>
+    </record>
+
+    <!-- Favoritos -->
+    <record id="knowledge_document_action_favorites" model="ir.actions.act_window">
+        <field name="name">★ Destacados</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="knowledge_document_view_search"/>
+        <field name="context">{'search_default_my_favorites': 1}</field>
+    </record>
+
+    <!-- Recientes -->
+    <record id="knowledge_document_action_recent" model="ir.actions.act_window">
+        <field name="name">Recientes</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="knowledge_document_view_search"/>
+        <field name="context">{'search_default_recent': 1}</field>
+    </record>
+
+    <!-- Pendientes revisión -->
+    <record id="knowledge_document_action_review" model="ir.actions.act_window">
+        <field name="name">Pendientes de Revisión</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="knowledge_document_view_search"/>
+        <field name="domain">[('state', '=', 'review')]</field>
+    </record>
+
+    <!-- Plantillas -->
+    <record id="knowledge_document_action_templates" model="ir.actions.act_window">
+        <field name="name">Plantillas</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="knowledge_document_view_search"/>
+        <field name="domain">[('doc_type', '=', 'template')]</field>
+        <field name="context">{'default_doc_type': 'template'}</field>
+    </record>
+
+    <!-- ═══ Acciones rápidas: crear por tipo ═══ -->
+    <record id="action_new_document" model="ir.actions.act_window">
+        <field name="name">📝 Nuevo Documento</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'default_doc_type': 'document'}</field>
+    </record>
+
+    <record id="action_new_spreadsheet" model="ir.actions.act_window">
+        <field name="name">📊 Nueva Hoja de Cálculo</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'default_doc_type': 'spreadsheet'}</field>
+    </record>
+
+    <record id="action_new_note" model="ir.actions.act_window">
+        <field name="name">📌 Nueva Nota</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'default_doc_type': 'note'}</field>
+    </record>
+
+    <record id="action_new_upload" model="ir.actions.act_window">
+        <field name="name">📎 Subir Archivo</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'default_doc_type': 'file'}</field>
+    </record>
+
+    <record id="action_new_link" model="ir.actions.act_window">
+        <field name="name">🔗 Nuevo Enlace</field>
+        <field name="res_model">knowledge.document</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'default_doc_type': 'link'}</field>
+    </record>
+
+    <!-- ═══ Version views ═══ -->
+    <record id="knowledge_document_version_view_list" model="ir.ui.view">
+        <field name="name">knowledge.document.version.list</field>
+        <field name="model">knowledge.document.version</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="document_id"/>
+                <field name="name"/>
+                <field name="version_number"/>
+                <field name="doc_type"/>
+                <field name="author_id" widget="many2one_avatar_user"/>
+                <field name="create_date"/>
+                <button name="action_restore_version" type="object"
+                    string="Restaurar" icon="fa-undo"
+                    groups="syntropy_knowledge_nath.group_knowledge_manager"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="knowledge_document_version_view_form" model="ir.ui.view">
+        <field name="name">knowledge.document.version.form</field>
+        <field name="model">knowledge.document.version</field>
+        <field name="arch" type="xml">
+            <form string="Versión" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="document_id"/>
+                            <field name="name"/>
+                            <field name="version_number"/>
+                            <field name="doc_type"/>
+                        </group>
+                        <group>
+                            <field name="author_id" widget="many2one_avatar_user"/>
+                            <field name="create_date"/>
+                        </group>
+                    </group>
+                    <separator string="Contenido"/>
+                    <field name="content" readonly="1" invisible="doc_type == 'note'"/>
+                    <field name="note_content" readonly="1" invisible="doc_type != 'note'"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

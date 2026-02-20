@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="module_category_knowledge" model="ir.module.category">
+        <field name="name">Syntropy Docs</field>
+        <field name="description">Gestión documental organizacional</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <!-- Grupo: Lector -->
+    <record id="group_knowledge_reader" model="res.groups">
+        <field name="name">Lector</field>
+        <field name="category_id" ref="module_category_knowledge"/>
+        <field name="comment">Ve documentos publicados. No edita.</field>
+    </record>
+
+    <!-- Grupo: Editor -->
+    <record id="group_knowledge_editor" model="res.groups">
+        <field name="name">Editor</field>
+        <field name="category_id" ref="module_category_knowledge"/>
+        <field name="implied_ids" eval="[(4, ref('group_knowledge_reader'))]"/>
+        <field name="comment">Crea, edita y sube archivos.</field>
+    </record>
+
+    <!-- Grupo: Administrador -->
+    <record id="group_knowledge_manager" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="category_id" ref="module_category_knowledge"/>
+        <field name="implied_ids" eval="[(4, ref('group_knowledge_editor'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Control total sobre workspaces, carpetas y documentos.</field>
+    </record>
+
+    <!-- ═══ Record Rules ═══ -->
+
+    <record id="rule_document_reader" model="ir.rule">
+        <field name="name">Document: Reader sees published</field>
+        <field name="model_id" ref="model_knowledge_document"/>
+        <field name="domain_force">[('state', '=', 'published')]</field>
+        <field name="groups" eval="[(4, ref('group_knowledge_reader'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_document_editor" model="ir.rule">
+        <field name="name">Document: Editor full read/write</field>
+        <field name="model_id" ref="model_knowledge_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_knowledge_editor'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_document_manager" model="ir.rule">
+        <field name="name">Document: Manager full access</field>
+        <field name="model_id" ref="model_knowledge_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_knowledge_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="rule_favorite_own" model="ir.rule">
+        <field name="name">Favorite: Own only</field>
+        <field name="model_id" ref="model_knowledge_favorite"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_knowledge_reader'))]"/>
+    </record>
+
+    <!-- Multi-company -->
+    <record id="rule_document_company" model="ir.rule">
+        <field name="name">Document: Multi-company</field>
+        <field name="model_id" ref="model_knowledge_document"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_workspace_company" model="ir.rule">
+        <field name="name">Workspace: Multi-company</field>
+        <field name="model_id" ref="model_knowledge_workspace"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_folder_company" model="ir.rule">
+        <field name="name">Folder: Multi-company</field>
+        <field name="model_id" ref="model_knowledge_folder"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+</odoo>
