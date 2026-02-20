@@ -10,25 +10,35 @@
     align-items: center;
     gap: 6px;
     cursor: pointer;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #7c3aed;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 15px;
+    color: #fff;
+    background: rgba(124, 58, 237, 0.85);
     transition: all 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 
     &:hover {
-        background: rgba(124, 58, 237, 0.1);
+        background: rgba(124, 58, 237, 1);
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.45);
     }
 
     &.o_timer_systray_running {
-        color: #28a745;
+        background: rgba(40, 167, 69, 0.9);
+        box-shadow: 0 1px 6px rgba(40, 167, 69, 0.4);
         animation: systray_pulse 2s ease-in-out infinite;
+
+        &:hover {
+            background: rgba(40, 167, 69, 1);
+            box-shadow: 0 2px 10px rgba(40, 167, 69, 0.55);
+        }
 
         .o_timer_systray_time {
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
         }
     }
 }

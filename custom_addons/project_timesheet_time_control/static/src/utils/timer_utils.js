@@ -68,9 +68,9 @@ export function formatAdaptiveTimer(totalSeconds) {
  */
 export function formatFloatTime(floatHours) {
     if (!floatHours || floatHours <= 0) {
-        return "0h 00m";
+        return "0h00min";
     }
     const hours = Math.floor(floatHours);
     const minutes = Math.round((floatHours - hours) * 60);
-    return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+    return `${hours}h${String(minutes).padStart(2, "0")}min`;
 }
