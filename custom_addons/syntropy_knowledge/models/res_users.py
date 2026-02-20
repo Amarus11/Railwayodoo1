@@ -6,7 +6,7 @@ from odoo import api, models, _
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Generate a welcome / tutorial article for every new internal user."""
         users = super().create(vals_list)

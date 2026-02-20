@@ -51,7 +51,7 @@ class KnowledgeArticle(models.Model):
         prefetch=False,
     )
     icon = fields.Char(
-        string="Icon",
+        string="Article Icon",
         size=30,
         help="Emoji used as the article icon.",
     )
