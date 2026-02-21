@@ -3,17 +3,12 @@
     <t t-name="project_timesheet_time_control.TimesheetTimerSystray">
         <div class="o_timer_systray_container">
 
-            <!-- Systray pill button -->
+            <!-- Systray icon button -->
             <div class="o_timer_systray_icon"
                  t-att-class="{ 'o_timer_systray_running': state.isRunning }"
-                 t-on-click="togglePanel">
-                <i class="fa fa-clock-o"/>
-                <t t-if="state.isRunning">
-                    <span class="o_timer_systray_time" t-esc="state.elapsedText"/>
-                </t>
-                <t t-else="">
-                    <span>Timer</span>
-                </t>
+                 t-on-click="togglePanel"
+                 t-att-title="state.isRunning ? state.elapsedText : 'Start Timer'">
+                <i t-att-class="state.isRunning ? 'fa fa-stop' : 'fa fa-play'"/>
             </div>
 
             <!-- Dropdown panel -->
