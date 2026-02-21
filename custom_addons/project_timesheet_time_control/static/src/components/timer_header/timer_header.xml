@@ -11,15 +11,13 @@
                            t-att-value="state.description"
                            t-on-input="onDescriptionInput"
                            t-on-keydown="onDescriptionKeydown"
-                           placeholder="What are you working on?"
-                           t-att-disabled="state.isRunning"/>
+                           placeholder="What are you working on?"/>
                 </div>
 
                 <!-- Project selector -->
                 <div class="o_timer_selector o_timer_project_selector">
                     <button class="o_timer_selector_btn"
                             t-on-click="toggleProjectDropdown"
-                            t-att-disabled="state.isRunning"
                             t-att-title="state.projectName || 'Select Project'">
                         <i class="fa fa-folder-o me-1"/>
                         <span class="o_timer_selector_text"
@@ -54,7 +52,7 @@
                 <div class="o_timer_selector o_timer_task_selector">
                     <button class="o_timer_selector_btn"
                             t-on-click="toggleTaskDropdown"
-                            t-att-disabled="state.isRunning || !state.projectId"
+                            t-att-disabled="!state.projectId"
                             t-att-title="state.taskName || 'Select Task'">
                         <i class="fa fa-tasks me-1"/>
                         <span class="o_timer_selector_text"
@@ -88,8 +86,7 @@
                 <!-- Tags selector (Feature 8) -->
                 <div class="o_timer_selector o_timer_tag_selector">
                     <button class="o_timer_selector_btn o_timer_tag_btn"
-                            t-on-click="toggleTagDropdown"
-                            t-att-disabled="state.isRunning">
+                            t-on-click="toggleTagDropdown">
                         <i class="fa fa-tags me-1"/>
                         <t t-if="state.tagNames.length">
                             <t t-foreach="state.tagNames" t-as="tname" t-key="tname_index">

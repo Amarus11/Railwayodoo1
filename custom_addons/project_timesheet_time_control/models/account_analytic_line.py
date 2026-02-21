@@ -269,6 +269,37 @@ class AccountAnalyticLine(models.Model):
         }
 
     @api.model
+    def update_running_timer(self, vals):
+        """Update the current user's running timer fields (description, project, task, tags)."""
+        running = self.search(self._running_domain(), limit=1)
+        if not running:
+            return False
+        write_vals = {}
+        if "name" in vals:
+            write_vals["name"] = vals["name"] or "/"
+        if "project_id" in vals:
+            write_vals["project_id"] = vals["project_id"]
+            if not vals.get("task_id"):
+                write_vals["task_id"] = False
+        if "task_id" in vals:
+            write_vals["task_id"] = vals["task_id"] or False
+        if "tag_ids" in vals:
+            write_vals["tag_ids"] = [(6, 0, vals["tag_ids"] or [])]
+        if write_vals:
+            running.write(write_vals)
+        return {
+            "id": running.id,
+            "name": running.name or "",
+            "project_id": running.project_id.id if running.project_id else False,
+            "project_name": running.project_id.name if running.project_id else "",
+            "task_id": running.task_id.id if running.task_id else False,
+            "task_name": running.task_id.name if running.task_id else "",
+            "date_time": fields.Datetime.to_string(running.date_time),
+            "tag_ids": running.tag_ids.ids,
+            "tag_names": running.tag_ids.mapped("name"),
+        }
+
+    @api.model
     def stop_running_timer(self):
         """Stop the current user's running timer and return the result."""
         running = self.search(self._running_domain(), limit=1)

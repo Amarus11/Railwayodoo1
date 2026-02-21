@@ -253,6 +253,9 @@ export class TimesheetTimerSystray extends Component {
         this.state.showProjectDropdown = false;
         this.state.projectSearch = "";
         await this._loadTasks();
+        if (this.state.isRunning) {
+            await this._updateRunningTimer({ project_id: project.id, task_id: false });
+        }
     }
 
     // ==================== TASK ====================
@@ -280,6 +283,9 @@ export class TimesheetTimerSystray extends Component {
         this.state.taskName = task.name;
         this.state.showTaskDropdown = false;
         this.state.taskSearch = "";
+        if (this.state.isRunning) {
+            this._updateRunningTimer({ task_id: task.id });
+        }
     }
 
     // ==================== TAGS ====================
@@ -314,6 +320,9 @@ export class TimesheetTimerSystray extends Component {
             this.state.tagIds.push(tag.id);
             this.state.tagNames.push(tag.name);
         }
+        if (this.state.isRunning) {
+            this._updateRunningTimer({ tag_ids: [...this.state.tagIds] });
+        }
     }
 
     getTagColor(index) {
@@ -323,6 +332,17 @@ export class TimesheetTimerSystray extends Component {
             "#D6145F", "#30C381", "#9365B8", "#4C4C4C",
         ];
         return colors[(index || 0) % colors.length];
+    }
+
+    // ==================== UPDATE RUNNING TIMER ====================
+
+    async _updateRunningTimer(vals) {
+        if (!this.state.isRunning || !this.state.runningTimerId) return;
+        try {
+            await this.orm.call("account.analytic.line", "update_running_timer", [vals]);
+        } catch (e) {
+            console.error("Systray: Failed to update running timer:", e);
+        }
     }
 
     // ==================== TIMER SYNC ====================

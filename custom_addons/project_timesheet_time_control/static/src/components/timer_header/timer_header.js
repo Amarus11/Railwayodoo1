@@ -65,6 +65,7 @@ export class TimesheetTimerHeader extends Component {
         this._boundKeyHandler = this._onGlobalKeyDown.bind(this);
         this._boundActivityHandler = this._onUserActivity.bind(this);
         this._boundClickOutside = this._onClickOutside.bind(this);
+        this._descUpdateTimeout = null;
 
         onMounted(async () => {
             // Load initial data
@@ -98,6 +99,7 @@ export class TimesheetTimerHeader extends Component {
         onWillUnmount(() => {
             this._stopTicker();
             this._restoreTitle();
+            if (this._descUpdateTimeout) clearTimeout(this._descUpdateTimeout);
             this.env.bus.removeEventListener("timesheet_timer_changed", this._timerSyncHandler);
             document.removeEventListener("keydown", this._boundKeyHandler);
             document.removeEventListener("mousemove", this._boundActivityHandler);
@@ -302,6 +304,9 @@ export class TimesheetTimerHeader extends Component {
 
     onDescriptionInput(ev) {
         this.state.description = ev.target.value;
+        if (this.state.isRunning) {
+            this._debouncedUpdateRunning({ name: this.state.description || "/" });
+        }
     }
 
     onDescriptionKeydown(ev) {
@@ -340,6 +345,12 @@ export class TimesheetTimerHeader extends Component {
         this.state.showProjectDropdown = false;
         this.state.projectSearch = "";
         await this._loadTasks();
+        if (this.state.isRunning) {
+            await this._updateRunningTimer({
+                project_id: project.id,
+                task_id: false,
+            });
+        }
     }
 
     // ==================== TASK SELECTOR ====================
@@ -374,6 +385,9 @@ export class TimesheetTimerHeader extends Component {
         this.state.taskName = task.name;
         this.state.showTaskDropdown = false;
         this.state.taskSearch = "";
+        if (this.state.isRunning) {
+            this._updateRunningTimer({ task_id: task.id });
+        }
     }
 
     // ==================== TAGS (Feature 8) ====================
@@ -410,6 +424,9 @@ export class TimesheetTimerHeader extends Component {
             this.state.tagIds.push(tag.id);
             this.state.tagNames.push(tag.name);
         }
+        if (this.state.isRunning) {
+            this._updateRunningTimer({ tag_ids: [...this.state.tagIds] });
+        }
     }
 
     async onCreateTag(ev) {
@@ -443,6 +460,9 @@ export class TimesheetTimerHeader extends Component {
         if (idx >= 0) {
             this.state.tagIds.splice(idx, 1);
             this.state.tagNames.splice(idx, 1);
+        }
+        if (this.state.isRunning) {
+            this._updateRunningTimer({ tag_ids: [...this.state.tagIds] });
         }
     }
 
@@ -589,6 +609,24 @@ export class TimesheetTimerHeader extends Component {
         // Stop timer but keep all time including idle
         this.state.idleDialogVisible = false;
         await this._stopTimer();
+    }
+
+    // ==================== LIVE UPDATE RUNNING TIMER ====================
+
+    _debouncedUpdateRunning(vals) {
+        if (this._descUpdateTimeout) clearTimeout(this._descUpdateTimeout);
+        this._descUpdateTimeout = setTimeout(() => {
+            this._updateRunningTimer(vals);
+        }, 500);
+    }
+
+    async _updateRunningTimer(vals) {
+        if (!this.state.isRunning || !this.state.runningTimerId) return;
+        try {
+            await this.orm.call("account.analytic.line", "update_running_timer", [vals]);
+        } catch (e) {
+            console.error("Failed to update running timer:", e);
+        }
     }
 
     // ==================== CLICK OUTSIDE ====================
