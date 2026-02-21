@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="knowledge_plus.FormatEditor">
+        <div class="o_format_editor_wrapper d-flex flex-column flex-grow-1 h-100">
+            <PresentationEditor t-if="isPresentation"
+                record="props.record"
+                readonly="isReadonly"/>
+            <SpreadsheetEditor t-elif="isSpreadsheet"
+                record="props.record"
+                readonly="isReadonly"/>
+            <WhiteboardEditor t-elif="isWhiteboard"
+                record="props.record"
+                readonly="isReadonly"/>
+        </div>
+    </t>
+</templates>

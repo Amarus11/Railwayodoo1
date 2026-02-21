@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Patch the sidebar template to add collapse functionality -->
+    <t t-name="knowledge.Sidebar" t-inherit="knowledge.Sidebar" t-inherit-mode="extension">
+
+        <!-- Add collapsed CSS class to the aside element -->
+        <xpath expr="//aside[hasclass('o_knowledge_sidebar')]" position="attributes">
+            <attribute name="t-att-class">{'o_sidebar_collapsed': state.sidebarCollapsed}</attribute>
+        </xpath>
+
+        <!-- Add collapse toggle button before the resizer -->
+        <xpath expr="//span[hasclass('o_knowledge_article_form_resizer')]" position="before">
+            <!-- Mini-icons shown only when collapsed -->
+            <div t-if="state.sidebarCollapsed" class="o_sidebar_mini_icons d-flex flex-column align-items-center gap-1 py-2 flex-grow-1 overflow-auto">
+                <t t-foreach="getMiniIcons()" t-as="item" t-key="item.id">
+                    <a role="button"
+                       t-attf-class="o_mini_icon d-flex align-items-center justify-content-center rounded #{item.isActive ? 'active' : ''}"
+                       t-att-title="item.name"
+                       t-on-click="() => this.onMiniIconClick(item.id)">
+                        <span t-if="item.icon" class="o_mini_icon_emoji" t-out="item.icon"/>
+                        <i t-else="" t-attf-class="fa #{item.fa} text-muted"/>
+                    </a>
+                </t>
+            </div>
+        </xpath>
+
+        <!-- Add collapse button at the edge of the sidebar -->
+        <xpath expr="//span[hasclass('o_knowledge_article_form_resizer')]" position="after">
+            <button class="o_sidebar_collapse_btn d-none d-md-flex btn btn-sm"
+                    t-on-click="toggleCollapse"
+                    t-att-title="state.sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+                <i t-attf-class="fa #{state.sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'}"/>
+            </button>
+        </xpath>
+
+        <!-- Hide the full sidebar content when collapsed -->
+        <xpath expr="//aside[hasclass('o_knowledge_sidebar')]/div[hasclass('d-flex')][1]" position="attributes">
+            <attribute name="class"/>
+            <attribute name="t-attf-class">#{state.sidebarCollapsed ? 'd-none' : 'd-flex'} flex-column flex-grow-1 min-w-0</attribute>
+        </xpath>
+
+    </t>
+</templates>

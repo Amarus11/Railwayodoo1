@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="knowledge_plus.WhiteboardEditor">
+        <div class="o_whiteboard_editor d-flex flex-column h-100 w-100 position-relative">
+            <div t-if="state.loading" class="o_whiteboard_loading position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white" style="z-index: 5;">
+                <div class="text-center text-muted">
+                    <i class="fa fa-2x fa-circle-o-notch fa-spin mb-2 d-block"/>
+                    <span>Loading Excalidraw...</span>
+                </div>
+            </div>
+            <iframe t-ref="excalidrawIframe"
+                    t-att-src="iframeSrc"
+                    t-on-load="onIframeLoad"
+                    class="o_excalidraw_iframe border-0 flex-grow-1 w-100"
+                    style="min-height: 500px;"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                    title="Excalidraw Whiteboard"/>
+        </div>
+    </t>
+</templates>

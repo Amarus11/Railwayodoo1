@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excalidraw Whiteboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+        .loading {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #666; font-size: 16px;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3; border-top: 3px solid #1ba1e4;
+            border-radius: 50%; width: 30px; height: 30px;
+            animation: spin 1s linear infinite; margin-right: 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            Loading Excalidraw...
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@excalidraw/excalidraw@0.17.0/dist/excalidraw.production.min.js"></script>
+
+    <script>
+    (function() {
+        "use strict";
+
+        let excalidrawAPI = null;
+        let saveTimeout = null;
+        const SAVE_DEBOUNCE_MS = 800;
+
+        // Listen for messages from parent (Odoo)
+        window.addEventListener("message", function(event) {
+            if (!event.data || !event.data.type) return;
+
+            switch (event.data.type) {
+                case "excalidraw:init":
+                    initExcalidraw(event.data.payload || {});
+                    break;
+                case "excalidraw:load":
+                    if (excalidrawAPI && event.data.payload) {
+                        excalidrawAPI.updateScene({
+                            elements: event.data.payload.elements || [],
+                        });
+                    }
+                    break;
+                case "excalidraw:setReadonly":
+                    // Could toggle viewModeEnabled in future versions
+                    break;
+            }
+        });
+
+        function initExcalidraw(data) {
+            const root = document.getElementById("root");
+            const elements = data.elements || [];
+            const appState = data.appState || {};
+            const files = data.files || {};
+
+            const App = React.createElement(
+                window.ExcalidrawLib.Excalidraw,
+                {
+                    initialData: {
+                        elements: elements,
+                        appState: {
+                            viewBackgroundColor: appState.viewBackgroundColor || "#ffffff",
+                            gridSize: appState.gridSize || null,
+                        },
+                        files: files,
+                    },
+                    excalidrawAPI: function(api) {
+                        excalidrawAPI = api;
+                    },
+                    onChange: function(updatedElements, updatedAppState, updatedFiles) {
+                        debouncedSave(updatedElements, updatedAppState, updatedFiles);
+                    },
+                    UIOptions: {
+                        canvasActions: {
+                            loadScene: false,
+                            export: { saveFileToDisk: true },
+                        },
+                    },
+                }
+            );
+
+            ReactDOM.createRoot(root).render(App);
+        }
+
+        function debouncedSave(elements, appState, files) {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(function() {
+                const payload = {
+                    elements: elements.map(function(el) {
+                        // Strip volatile properties
+                        var clean = Object.assign({}, el);
+                        delete clean.seed;
+                        return clean;
+                    }),
+                    appState: {
+                        viewBackgroundColor: appState.viewBackgroundColor || "#ffffff",
+                        gridSize: appState.gridSize || null,
+                    },
+                    files: files || {},
+                };
+                window.parent.postMessage({
+                    type: "excalidraw:save",
+                    payload: payload,
+                }, "*");
+            }, SAVE_DEBOUNCE_MS);
+        }
+
+        // Notify parent that iframe is ready
+        window.parent.postMessage({ type: "excalidraw:ready" }, "*");
+    })();
+    </script>
+</body>
+</html>

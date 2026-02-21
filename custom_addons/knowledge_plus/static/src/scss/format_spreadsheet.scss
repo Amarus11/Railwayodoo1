@@ -1,0 +1,22 @@
+/* ======================================================================
+   Knowledge Plus — Spreadsheet Editor Styles
+   ====================================================================== */
+
+.o_spreadsheet_editor {
+    min-height: 500px;
+}
+
+.o_spreadsheet_container {
+    overflow: hidden;
+    position: relative;
+
+    /* Fix x-spreadsheet sizing inside Odoo's flex layout */
+    .x-spreadsheet {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .x-spreadsheet-sheet {
+        overflow: hidden;
+    }
+}
