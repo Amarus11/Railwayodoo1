@@ -63,6 +63,8 @@ class KnowledgeArticle(models.Model):
             })
         return "{}"
 
+    @api.model
+    @api.returns('knowledge.article', lambda article: article.id)
     def article_create(self, title=False, parent_id=False, is_private=False,
                        is_article_item=False, article_properties=False,
                        format_type="article"):
