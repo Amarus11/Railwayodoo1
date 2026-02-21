@@ -12,11 +12,15 @@ const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes default
 
 export class TimesheetTimerHeader extends Component {
     static template = "project_timesheet_time_control.TimesheetTimerHeader";
+    static props = {
+        onTimerStopped: { type: Function, optional: true },
+    };
 
     setup() {
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.descriptionInput = useRef("descriptionInput");
+        this._timerSyncHandler = this._onTimerSyncEvent.bind(this);
 
         this.state = useState({
             // Timer state
@@ -86,11 +90,15 @@ export class TimesheetTimerHeader extends Component {
 
             // Click outside to close dropdowns
             document.addEventListener("click", this._boundClickOutside, true);
+
+            // Sync with other timer components via OWL bus
+            this.env.bus.addEventListener("timesheet_timer_changed", this._timerSyncHandler);
         });
 
         onWillUnmount(() => {
             this._stopTicker();
             this._restoreTitle();
+            this.env.bus.removeEventListener("timesheet_timer_changed", this._timerSyncHandler);
             document.removeEventListener("keydown", this._boundKeyHandler);
             document.removeEventListener("mousemove", this._boundActivityHandler);
             document.removeEventListener("keypress", this._boundActivityHandler);
@@ -216,8 +224,8 @@ export class TimesheetTimerHeader extends Component {
                 this.state.dateTime = data.date_time;
                 this.state.lastActivityTime = Date.now();
                 this._startTicker();
-                // Notify other timer components
-                this.bus.trigger("timesheet_timer_changed", { action: "start", data });
+                // Notify other timer components via OWL bus
+                this.env.bus.trigger("timesheet_timer_changed", { action: "start", data });
             }
         } catch (e) {
             this.notification.add("Failed to start timer: " + (e.message || e), {
@@ -234,8 +242,8 @@ export class TimesheetTimerHeader extends Component {
                 []
             );
             this._resetTimerState();
-            // Notify other timer components
-            this.bus.trigger("timesheet_timer_changed", { action: "stop" });
+            // Notify other timer components via OWL bus
+            this.env.bus.trigger("timesheet_timer_changed", { action: "stop" });
             // Trigger dashboard refresh if parent provides callback
             if (this.props.onTimerStopped) {
                 this.props.onTimerStopped();
@@ -612,5 +620,20 @@ export class TimesheetTimerHeader extends Component {
             "#D6145F", "#30C381", "#9365B8", "#4C4C4C",
         ];
         return colors[(index || 0) % colors.length];
+    }
+
+    // ==================== TIMER SYNC ====================
+
+    async _onTimerSyncEvent(ev) {
+        const eventData = ev.detail || {};
+        // Ignore events we triggered ourselves (prevent reload loop)
+        if (this.state._selfTriggered) return;
+        await this._loadRunningTimer();
+        if (this.state.isRunning) {
+            this._startTicker();
+        } else {
+            this._stopTicker();
+            this._restoreTitle();
+        }
     }
 }

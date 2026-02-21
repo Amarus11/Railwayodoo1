@@ -48,12 +48,6 @@ class TimesheetTimeReport(models.Model):
         readonly=True,
     )
     year = fields.Integer(string="Year", readonly=True)
-    tag_ids = fields.Many2many(
-        "hr.timesheet.tag",
-        string="Tags",
-        readonly=True,
-        help="Tags associated with this timesheet entry",
-    )
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
