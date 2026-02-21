@@ -283,19 +283,6 @@ class AccountAnalyticLine(models.Model):
         }
 
     @api.model
-    def update_running_timer(self, vals):
-        """Update the description of the currently running timer."""
-        running = self.search(self._running_domain(), limit=1)
-        if not running:
-            return False
-        write_vals = {}
-        if "name" in vals:
-            write_vals["name"] = vals["name"]
-        if write_vals:
-            running.write(write_vals)
-        return True
-
-    @api.model
     def get_timer_projects(self):
         """Return list of projects available for timer."""
         projects = self.env["project.project"].search(

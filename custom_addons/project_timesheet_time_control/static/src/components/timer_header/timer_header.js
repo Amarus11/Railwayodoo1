@@ -12,9 +12,6 @@ const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes default
 
 export class TimesheetTimerHeader extends Component {
     static template = "project_timesheet_time_control.TimesheetTimerHeader";
-    static props = {
-        onTimerStopped: { type: Function, optional: true },
-    };
 
     setup() {
         this.orm = useService("orm");
@@ -60,7 +57,6 @@ export class TimesheetTimerHeader extends Component {
 
         this._tickerInterval = null;
         this._idleCheckInterval = null;
-        this._descUpdateTimeout = null;
         this._originalTitle = document.title;
         this._boundKeyHandler = this._onGlobalKeyDown.bind(this);
         this._boundActivityHandler = this._onUserActivity.bind(this);
@@ -95,9 +91,6 @@ export class TimesheetTimerHeader extends Component {
         onWillUnmount(() => {
             this._stopTicker();
             this._restoreTitle();
-            if (this._descUpdateTimeout) {
-                clearTimeout(this._descUpdateTimeout);
-            }
             document.removeEventListener("keydown", this._boundKeyHandler);
             document.removeEventListener("mousemove", this._boundActivityHandler);
             document.removeEventListener("keypress", this._boundActivityHandler);
@@ -223,6 +216,8 @@ export class TimesheetTimerHeader extends Component {
                 this.state.dateTime = data.date_time;
                 this.state.lastActivityTime = Date.now();
                 this._startTicker();
+                // Notify other timer components
+                this.bus.trigger("timesheet_timer_changed", { action: "start", data });
             }
         } catch (e) {
             this.notification.add("Failed to start timer: " + (e.message || e), {
@@ -239,6 +234,8 @@ export class TimesheetTimerHeader extends Component {
                 []
             );
             this._resetTimerState();
+            // Notify other timer components
+            this.bus.trigger("timesheet_timer_changed", { action: "stop" });
             // Trigger dashboard refresh if parent provides callback
             if (this.props.onTimerStopped) {
                 this.props.onTimerStopped();
@@ -297,27 +294,6 @@ export class TimesheetTimerHeader extends Component {
 
     onDescriptionInput(ev) {
         this.state.description = ev.target.value;
-        // If timer is already running, update description on the server (debounced)
-        if (this.state.isRunning) {
-            this._debouncedUpdateDescription();
-        }
-    }
-
-    _debouncedUpdateDescription() {
-        if (this._descUpdateTimeout) {
-            clearTimeout(this._descUpdateTimeout);
-        }
-        this._descUpdateTimeout = setTimeout(async () => {
-            try {
-                await this.orm.call(
-                    "account.analytic.line",
-                    "update_running_timer",
-                    [{ name: this.state.description || "/" }]
-                );
-            } catch (e) {
-                console.error("Failed to update description:", e);
-            }
-        }, 500);
     }
 
     onDescriptionKeydown(ev) {
@@ -358,14 +334,6 @@ export class TimesheetTimerHeader extends Component {
         await this._loadTasks();
     }
 
-    clearProject() {
-        this.state.projectId = false;
-        this.state.projectName = "";
-        this.state.taskId = false;
-        this.state.taskName = "";
-        this.state.tasks = [];
-    }
-
     // ==================== TASK SELECTOR ====================
 
     onTaskSearchInput(ev) {
@@ -398,11 +366,6 @@ export class TimesheetTimerHeader extends Component {
         this.state.taskName = task.name;
         this.state.showTaskDropdown = false;
         this.state.taskSearch = "";
-    }
-
-    clearTask() {
-        this.state.taskId = false;
-        this.state.taskName = "";
     }
 
     // ==================== TAGS (Feature 8) ====================
@@ -608,10 +571,10 @@ export class TimesheetTimerHeader extends Component {
             console.error("Failed to discard idle time:", e);
         }
         this._resetTimerState();
-        // Trigger dashboard refresh
-        if (this.props.onTimerStopped) {
-            this.props.onTimerStopped();
-        }
+        this.notification.add("Timer stopped. Idle time discarded.", {
+            type: "info",
+            sticky: false,
+        });
     }
 
     async onIdleStopKeep() {

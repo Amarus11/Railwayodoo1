@@ -3,7 +3,7 @@
     <t t-name="project_timesheet_time_control.TimesheetDashboard">
         <div class="o_timesheet_dashboard o_action">
             <!-- Timer Header Bar (Toggl-style) -->
-            <TimesheetTimerHeader onTimerStopped.bind="onTimerStopped"/>
+            <TimesheetTimerHeader/>
 
             <div class="container-fluid py-3">
                 <!-- Header -->

@@ -41,6 +41,12 @@
                 box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
             }
 
+            &:disabled {
+                background: #e9ecef;
+                color: #495057;
+                cursor: not-allowed;
+            }
+
             &::placeholder {
                 color: #adb5bd;
                 font-style: italic;

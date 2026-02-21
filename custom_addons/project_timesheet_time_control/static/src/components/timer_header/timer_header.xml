@@ -11,7 +11,8 @@
                            t-att-value="state.description"
                            t-on-input="onDescriptionInput"
                            t-on-keydown="onDescriptionKeydown"
-                           placeholder="What are you working on?"/>
+                           placeholder="What are you working on?"
+                           t-att-disabled="state.isRunning"/>
                 </div>
 
                 <!-- Project selector -->
