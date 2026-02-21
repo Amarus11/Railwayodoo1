@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="project_timesheet_time_control.TimesheetTimerSystray">
+        <div class="o_timer_systray_container">
+
+            <!-- Systray pill button -->
+            <div class="o_timer_systray_icon"
+                 t-att-class="{ 'o_timer_systray_running': state.isRunning }"
+                 t-on-click="togglePanel">
+                <i class="fa fa-clock-o"/>
+                <t t-if="state.isRunning">
+                    <span class="o_timer_systray_time" t-esc="state.elapsedText"/>
+                </t>
+                <t t-else="">
+                    <span>Timer</span>
+                </t>
+            </div>
+
+            <!-- Dropdown panel -->
+            <div t-if="state.panelOpen" class="o_timer_systray_panel">
+
+                <!-- Header -->
+                <div class="o_systray_panel_header">
+                    <strong>Timesheet Timer</strong>
+                    <button class="o_systray_panel_close" t-on-click="togglePanel">✕</button>
+                </div>
+
+                <!-- Description -->
+                <div class="o_systray_field">
+                    <input type="text"
+                           class="o_systray_input"
+                           placeholder="What are you working on?"
+                           t-att-value="state.description"
+                           t-on-input="onDescriptionInput"/>
+                </div>
+
+                <!-- Project selector -->
+                <div class="o_systray_field">
+                    <div class="o_systray_selector">
+                        <button class="o_systray_selector_btn" t-on-click="toggleProjectDropdown">
+                            <i class="fa fa-folder-o me-1"/>
+                            <span t-esc="state.projectName || 'Select Project...'"/>
+                            <i class="fa fa-caret-down ms-auto"/>
+                        </button>
+                        <div t-if="state.showProjectDropdown" class="o_systray_dropdown">
+                            <input type="text"
+                                   class="o_systray_dropdown_search"
+                                   placeholder="Search project..."
+                                   t-att-value="state.projectSearch"
+                                   t-on-input="onProjectSearchInput"/>
+                            <div class="o_systray_dropdown_list">
+                                <t t-if="filteredProjects.length === 0">
+                                    <div class="o_systray_dropdown_empty">No projects found</div>
+                                </t>
+                                <t t-foreach="filteredProjects" t-as="project" t-key="project.id">
+                                    <div class="o_systray_dropdown_item"
+                                         t-att-class="{ active: state.projectId === project.id }"
+                                         t-on-click="() => this.selectProject(project)">
+                                        <t t-esc="project.name"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task selector -->
+                <div class="o_systray_field">
+                    <div class="o_systray_selector">
+                        <button class="o_systray_selector_btn"
+                                t-att-disabled="!state.projectId ? true : undefined"
+                                t-on-click="toggleTaskDropdown">
+                            <i class="fa fa-tasks me-1"/>
+                            <span t-esc="state.taskName || 'Select Task (optional)'"/>
+                            <i class="fa fa-caret-down ms-auto"/>
+                        </button>
+                        <div t-if="state.showTaskDropdown" class="o_systray_dropdown">
+                            <input type="text"
+                                   class="o_systray_dropdown_search"
+                                   placeholder="Search task..."
+                                   t-att-value="state.taskSearch"
+                                   t-on-input="onTaskSearchInput"/>
+                            <div class="o_systray_dropdown_list">
+                                <t t-if="filteredTasks.length === 0">
+                                    <div class="o_systray_dropdown_empty">No tasks found</div>
+                                </t>
+                                <t t-foreach="filteredTasks" t-as="task" t-key="task.id">
+                                    <div class="o_systray_dropdown_item"
+                                         t-att-class="{ active: state.taskId === task.id }"
+                                         t-on-click="() => this.selectTask(task)">
+                                        <t t-esc="task.name"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags selector -->
+                <div class="o_systray_field">
+                    <div class="o_systray_selector">
+                        <button class="o_systray_selector_btn" t-on-click="toggleTagDropdown">
+                            <i class="fa fa-tag me-1"/>
+                            <t t-if="state.tagNames.length === 0">
+                                <span>Add Tags (optional)</span>
+                            </t>
+                            <t t-else="">
+                                <t t-foreach="state.tagNames" t-as="tagName" t-key="tagName_index">
+                                    <span class="o_systray_tag_badge"
+                                          t-att-style="'background:' + getTagColor(tagName_index)">
+                                        <t t-esc="tagName"/>
+                                    </span>
+                                </t>
+                            </t>
+                        </button>
+                        <div t-if="state.showTagDropdown" class="o_systray_dropdown">
+                            <input type="text"
+                                   class="o_systray_dropdown_search"
+                                   placeholder="Search tags..."
+                                   t-att-value="state.tagSearch"
+                                   t-on-input="onTagSearchInput"/>
+                            <div class="o_systray_dropdown_list">
+                                <t t-if="filteredTags.length === 0">
+                                    <div class="o_systray_dropdown_empty">No tags found</div>
+                                </t>
+                                <t t-foreach="filteredTags" t-as="tag" t-key="tag.id">
+                                    <div class="o_systray_dropdown_item"
+                                         t-att-class="{ active: isTagSelected(tag.id) }"
+                                         t-on-click="() => this.toggleTag(tag)">
+                                        <span class="o_systray_tag_dot"
+                                              t-att-style="'background:' + getTagColor(tag_index)"/>
+                                        <t t-esc="tag.name"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions: elapsed time + start/stop button -->
+                <div class="o_systray_actions">
+                    <t t-if="state.isRunning">
+                        <span class="o_systray_elapsed" t-esc="state.elapsedText"/>
+                    </t>
+                    <button class="o_systray_timer_btn"
+                            t-att-class="state.isRunning ? 'o_systray_stop' : 'o_systray_start'"
+                            t-on-click="onToggleTimer">
+                        <t t-if="state.isRunning">⏹ Stop</t>
+                        <t t-else="">▶ Start</t>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </t>
+</templates>

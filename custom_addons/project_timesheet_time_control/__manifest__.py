@@ -35,6 +35,8 @@
             "project_timesheet_time_control/static/src/dashboard/*.js",
             "project_timesheet_time_control/static/src/dashboard/*.xml",
             "project_timesheet_time_control/static/src/dashboard/*.scss",
+            "project_timesheet_time_control/static/src/webclient/*.js",
+            "project_timesheet_time_control/static/src/webclient/*.xml",
         ],
     },
     "license": "AGPL-3",
