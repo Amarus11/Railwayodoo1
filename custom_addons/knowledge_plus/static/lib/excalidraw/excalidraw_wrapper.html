@@ -19,6 +19,10 @@
             animation: spin 1s linear infinite; margin-right: 12px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .error-msg {
+            color: #dc3545; padding: 20px; text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -29,100 +33,96 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@excalidraw/excalidraw@0.17.0/dist/excalidraw.production.min.js"></script>
+    <!-- Use ESM via esm.sh to get proper JSX runtime resolution -->
+    <script type="module">
+    import React from "https://esm.sh/react@18.2.0";
+    import { createRoot } from "https://esm.sh/react-dom@18.2.0/client";
+    import { Excalidraw } from "https://esm.sh/@excalidraw/excalidraw@0.17.6?deps=react@18.2.0,react-dom@18.2.0";
 
-    <script>
-    (function() {
-        "use strict";
+    let excalidrawAPI = null;
+    let saveTimeout = null;
+    const SAVE_DEBOUNCE_MS = 800;
 
-        let excalidrawAPI = null;
-        let saveTimeout = null;
-        const SAVE_DEBOUNCE_MS = 800;
+    // Listen for messages from parent (Odoo)
+    window.addEventListener("message", function(event) {
+        if (!event.data || !event.data.type) return;
 
-        // Listen for messages from parent (Odoo)
-        window.addEventListener("message", function(event) {
-            if (!event.data || !event.data.type) return;
-
-            switch (event.data.type) {
-                case "excalidraw:init":
-                    initExcalidraw(event.data.payload || {});
-                    break;
-                case "excalidraw:load":
-                    if (excalidrawAPI && event.data.payload) {
-                        excalidrawAPI.updateScene({
-                            elements: event.data.payload.elements || [],
-                        });
-                    }
-                    break;
-                case "excalidraw:setReadonly":
-                    // Could toggle viewModeEnabled in future versions
-                    break;
-            }
-        });
-
-        function initExcalidraw(data) {
-            const root = document.getElementById("root");
-            const elements = data.elements || [];
-            const appState = data.appState || {};
-            const files = data.files || {};
-
-            const App = React.createElement(
-                window.ExcalidrawLib.Excalidraw,
-                {
-                    initialData: {
-                        elements: elements,
-                        appState: {
-                            viewBackgroundColor: appState.viewBackgroundColor || "#ffffff",
-                            gridSize: appState.gridSize || null,
-                        },
-                        files: files,
-                    },
-                    excalidrawAPI: function(api) {
-                        excalidrawAPI = api;
-                    },
-                    onChange: function(updatedElements, updatedAppState, updatedFiles) {
-                        debouncedSave(updatedElements, updatedAppState, updatedFiles);
-                    },
-                    UIOptions: {
-                        canvasActions: {
-                            loadScene: false,
-                            export: { saveFileToDisk: true },
-                        },
-                    },
+        switch (event.data.type) {
+            case "excalidraw:init":
+                initExcalidraw(event.data.payload || {});
+                break;
+            case "excalidraw:load":
+                if (excalidrawAPI && event.data.payload) {
+                    excalidrawAPI.updateScene({
+                        elements: event.data.payload.elements || [],
+                    });
                 }
-            );
-
-            ReactDOM.createRoot(root).render(App);
+                break;
         }
+    });
 
-        function debouncedSave(elements, appState, files) {
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(function() {
-                const payload = {
-                    elements: elements.map(function(el) {
-                        // Strip volatile properties
-                        var clean = Object.assign({}, el);
-                        delete clean.seed;
-                        return clean;
-                    }),
+    function initExcalidraw(data) {
+        const rootEl = document.getElementById("root");
+        const elements = data.elements || [];
+        const appState = data.appState || {};
+        const files = data.files || {};
+
+        try {
+            const App = React.createElement(Excalidraw, {
+                initialData: {
+                    elements: elements,
                     appState: {
                         viewBackgroundColor: appState.viewBackgroundColor || "#ffffff",
                         gridSize: appState.gridSize || null,
                     },
-                    files: files || {},
-                };
-                window.parent.postMessage({
-                    type: "excalidraw:save",
-                    payload: payload,
-                }, "*");
-            }, SAVE_DEBOUNCE_MS);
-        }
+                    files: files,
+                },
+                excalidrawAPI: function(api) {
+                    excalidrawAPI = api;
+                },
+                onChange: function(updatedElements, updatedAppState, updatedFiles) {
+                    debouncedSave(updatedElements, updatedAppState, updatedFiles);
+                },
+                UIOptions: {
+                    canvasActions: {
+                        loadScene: false,
+                        export: { saveFileToDisk: true },
+                    },
+                },
+            });
 
-        // Notify parent that iframe is ready
-        window.parent.postMessage({ type: "excalidraw:ready" }, "*");
-    })();
+            createRoot(rootEl).render(App);
+        } catch (e) {
+            rootEl.innerHTML = '<div class="error-msg">Failed to load Excalidraw: ' + e.message + '</div>';
+            console.error("Excalidraw init error:", e);
+        }
+    }
+
+    function debouncedSave(elements, appState, files) {
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(function() {
+            const payload = {
+                elements: elements.map(function(el) {
+                    // Strip volatile properties
+                    var clean = Object.assign({}, el);
+                    delete clean.seed;
+                    return clean;
+                }),
+                appState: {
+                    viewBackgroundColor: appState.viewBackgroundColor || "#ffffff",
+                    gridSize: appState.gridSize || null,
+                },
+                files: files || {},
+            };
+            window.parent.postMessage({
+                type: "excalidraw:save",
+                payload: payload,
+            }, "*");
+        }, SAVE_DEBOUNCE_MS);
+    }
+
+    // Notify parent that iframe is ready
+    window.parent.postMessage({ type: "excalidraw:ready" }, "*");
     </script>
 </body>
 </html>
