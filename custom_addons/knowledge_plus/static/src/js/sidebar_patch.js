@@ -31,14 +31,9 @@ patch(KnowledgeSidebar.prototype, {
 
     /**
      * Get a flat list of root-level articles with their icons for mini mode.
-     * @returns {Array<{id, icon, name, category, fa, isActive, formatType}>}
+     * @returns {Array<{id, icon, name, category, fa, isActive}>}
      */
     getMiniIcons() {
-        const FORMAT_ICONS = {
-            presentation: "fa-television",
-            spreadsheet: "fa-table",
-            whiteboard: "fa-paint-brush",
-        };
         const icons = [];
         const sections = [
             { ids: this.state.workspaceIds || [], category: "workspace", fa: "fa-building" },
@@ -49,14 +44,12 @@ patch(KnowledgeSidebar.prototype, {
             for (const id of section.ids) {
                 const article = this.getArticle(id);
                 if (article) {
-                    const fmt = article.format_type || "article";
                     icons.push({
                         id: article.id,
                         icon: article.icon || null,
                         name: article.name || "Untitled",
                         category: section.category,
-                        fa: FORMAT_ICONS[fmt] || section.fa,
-                        formatType: fmt,
+                        fa: section.fa,
                         isActive: article.id === this.props.record.resId,
                     });
                 }
@@ -66,14 +59,12 @@ patch(KnowledgeSidebar.prototype, {
         for (const id of (this.state.favoriteIds || [])) {
             const article = this.getArticle(id);
             if (article && !icons.some(i => i.id === article.id)) {
-                const fmt = article.format_type || "article";
                 icons.push({
                     id: article.id,
                     icon: article.icon || null,
                     name: article.name || "Untitled",
                     category: "favorite",
-                    fa: FORMAT_ICONS[fmt] || "fa-star",
-                    formatType: fmt,
+                    fa: "fa-star",
                     isActive: article.id === this.props.record.resId,
                 });
             }
