@@ -1,40 +1,39 @@
 #!/bin/bash
 set -e
 
-# ---- Database connection setup (same as official Odoo entrypoint) ----
-if [ -v PASSWORD_FILE ]; then
-    PASSWORD="$(< $PASSWORD_FILE)"
-fi
+# ---- Map Railway env vars to Odoo connection params ----
+DB_HOST="${ODOO_DATABASE_HOST:-${HOST:-db}}"
+DB_PORT="${ODOO_DATABASE_PORT:-${PORT:-5432}}"
+DB_USER="${ODOO_DATABASE_USER:-${USER:-odoo}}"
+DB_PASS="${ODOO_DATABASE_PASSWORD:-${PASSWORD:-odoo}}"
+DB_NAME="${ODOO_DATABASE_NAME:-${PGDATABASE:-odoo}}"
 
-: "${HOST:=${DB_PORT_5432_TCP_ADDR:='db'}}"
-: "${PORT:=${DB_PORT_5432_TCP_PORT:=5432}}"
-: "${USER:=${DB_ENV_POSTGRES_USER:=${POSTGRES_USER:='odoo'}}}"
-: "${PASSWORD:=${DB_ENV_POSTGRES_PASSWORD:=${POSTGRES_PASSWORD:='odoo'}}}"
+DB_ARGS=("--db_host" "$DB_HOST" "--db_port" "$DB_PORT" "--db_user" "$DB_USER" "--db_password" "$DB_PASS")
 
-DB_ARGS=()
-check_config() {
-    param="$1"
-    value="$2"
-    if grep -q -E "^\s*\b${param}\b\s*=" "$ODOO_RC" ; then
-        value=$(grep -E "^\s*\b${param}\b\s*=" "$ODOO_RC" | cut -d " " -f3 | sed 's/["\r\n]//g')
+# ---- Wait for PostgreSQL ----
+echo "=== Waiting for PostgreSQL at $DB_HOST:$DB_PORT ==="
+for i in $(seq 1 30); do
+    if python3 -c "
+import psycopg2, sys
+try:
+    conn = psycopg2.connect(host='$DB_HOST', port=$DB_PORT, user='$DB_USER', password='$DB_PASS', dbname='$DB_NAME')
+    conn.close()
+    sys.exit(0)
+except Exception:
+    sys.exit(1)
+" 2>/dev/null; then
+        echo "PostgreSQL is ready."
+        break
     fi
-    DB_ARGS+=("--${param}")
-    DB_ARGS+=("${value}")
-}
-check_config "db_host" "$HOST"
-check_config "db_port" "$PORT"
-check_config "db_user" "$USER"
-check_config "db_password" "$PASSWORD"
-
-# Wait for PostgreSQL
-wait-for-psql.py ${DB_ARGS[@]} --timeout=30
+    echo "Waiting for PostgreSQL... ($i/30)"
+    sleep 2
+done
 
 # ---- Auto-upgrade custom modules once per container start ----
-DB_NAME="${PGDATABASE:-${DB_NAME:-odoo}}"
 MARKER="/tmp/.odoo_upgraded"
 
 if [ ! -f "$MARKER" ]; then
-    echo "=== Upgrading custom modules on database '$DB_NAME' ==="
+    echo "=== Upgrading project_timesheet_time_control on '$DB_NAME' ==="
     odoo --no-http --stop-after-init \
         -d "$DB_NAME" \
         -u project_timesheet_time_control \
